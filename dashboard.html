@@ -3215,73 +3215,156 @@ let cart =
 
 
 /* ============================================================
-   INIT
+   INIT + AUTH
 ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
+/*
+  FaqihMart memakai index.html sebagai halaman LOGIN.
+  Dashboard tidak boleh melakukan redirect hanya karena event auth
+  sementara. Dua perangkat dengan dua akun berbeda boleh aktif
+  bersamaan.
+*/
+
+let dashboardInitialized = false;
+let dashboardRedirecting = false;
+let explicitLogout = false;
+
+document.addEventListener("DOMContentLoaded", init);
 
 document.addEventListener("change", event => {
-    if(event.target?.id === "checkoutPayment") showCheckoutQrisHint();
+    if(event.target?.id === "checkoutPayment"){
+        showCheckoutQrisHint();
+    }
 });
+
+
+async function getStableSession(){
+
+    /*
+      Beri waktu Supabase memulihkan session dari storage.
+      Ini mencegah redirect palsu ketika dashboard baru dibuka.
+    */
+    let lastError = null;
+
+    for(let attempt = 0; attempt < 3; attempt++){
+
+        try{
+
+            const {data, error} =
+                await supabaseClient.auth.getSession();
+
+            if(error){
+                lastError = error;
+            }else if(data?.session){
+                return data.session;
+            }
+
+        }catch(error){
+            lastError = error;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 350));
+    }
+
+    if(lastError){
+        console.error("GET SESSION ERROR:", lastError);
+    }
+
+    return null;
+}
+
+
+async function redirectToLogin(){
+
+    if(dashboardRedirecting) return;
+
+    dashboardRedirecting = true;
+
+    window.location.replace("index.html");
+}
 
 
 async function init(){
 
     try{
 
-        const {
-            data,
-            error
-        } =
-        await supabaseClient.auth.getSession();
+        const session = await getStableSession();
 
-        if(error){
-            throw error;
-        }
+        if(!session){
 
-        if(!data.session){
-
-            window.location.href =
-                "index.html";
-
+            hideLoading();
+            await redirectToLogin();
             return;
         }
 
-        currentUser =
-            data.session.user;
+        currentUser = session.user;
 
-        await loadProfile();
+        /*
+          Kegagalan data biasa tidak boleh dianggap sebagai logout.
+        */
+        try{
+            await loadProfile();
+        }catch(error){
+            console.error("LOAD PROFILE:", error);
+            showToast(
+                "Profil gagal dimuat: " +
+                getErrorMessage(error),
+                true
+            );
+        }
 
-        await loadProducts();
+        try{
+            await loadProducts();
+        }catch(error){
+            console.error("LOAD PRODUCTS:", error);
+            showToast(
+                "Produk gagal dimuat: " +
+                getErrorMessage(error),
+                true
+            );
+        }
 
-        await loadMyOrders();
+        try{
+            await loadMyOrders();
+        }catch(error){
+            console.error("LOAD ORDERS:", error);
+        }
 
         updateCartCount();
 
-        await loadSellerData();
+        try{
+            await loadSellerData();
+        }catch(error){
+            console.error("LOAD SELLER DATA:", error);
+        }
 
         renderHome();
 
         try{
             await loadChatConversations();
         }catch(chatError){
-            console.warn("Initial chat load:", chatError.message);
+            console.warn(
+                "Initial chat load:",
+                chatError.message
+            );
         }
+
         startChatPolling();
 
+        dashboardInitialized = true;
         hideLoading();
 
     }catch(error){
 
-        console.error(error);
+        console.error("DASHBOARD INIT ERROR:", error);
 
         hideLoading();
 
+        /*
+          Error database/API tidak otomatis mengeluarkan user.
+        */
         showToast(
-            "Gagal memuat dashboard: " +
+            "Gagal memuat sebagian data: " +
             getErrorMessage(error),
             true
         );
@@ -3296,13 +3379,31 @@ async function init(){
 supabaseClient.auth.onAuthStateChange(
     async (event, session) => {
 
+        console.log(
+            "[FaqihMart Auth]",
+            event,
+            session ? "session=OK" : "session=NULL"
+        );
+
+        /*
+          Jangan redirect dari event auth biasa.
+          Hanya logout yang benar-benar dilakukan user yang
+          boleh membawa kembali ke index.html.
+        */
         if(event === "SIGNED_OUT"){
 
-            window.location.href =
-                "index.html";
+            if(explicitLogout){
 
+                await redirectToLogin();
+
+            }else{
+
+                showToast(
+                    "Sesi login berakhir. Silakan login kembali jika diperlukan.",
+                    true
+                );
+            }
         }
-
     }
 );
 
@@ -6695,23 +6796,23 @@ async function logout(){
 
     try{
 
+        explicitLogout = true;
+
         await supabaseClient.auth.signOut();
 
-        localStorage.removeItem(
-            "nexamart_cart"
-        );
+        localStorage.removeItem("nexamart_cart");
 
-        window.location.href =
-            "index.html";
+        window.location.replace("index.html");
 
     }catch(error){
+
+        explicitLogout = false;
 
         showToast(
             "Gagal keluar: " +
             getErrorMessage(error),
             true
         );
-
     }
 }
 
