@@ -758,7 +758,7 @@ button{
 
 
 /* =========================================================
-   CHAT V7
+   CHAT V5 - WHATSAPP STYLE + MOBILE
 ========================================================= */
 .chatHeaderBtn{min-width:48px}
 .chatBadge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
@@ -776,9 +776,8 @@ button{
 .chatDeleteMessage:hover{background:#fee2e2;color:#dc2626}
 .chatHeaderActions{display:flex;gap:6px;align-items:center}
 .chatDangerBtn{border:0;background:#fee2e2;color:#dc2626;border-radius:10px;padding:8px 10px;font-weight:700}
-.chatDangerBtn:hover{background:#fecaca}
 .chatConversation:hover,.chatConversation.active{background:#f5f3ff}
-.chatAvatar{width:46px;height:46px;border-radius:12px;object-fit:cover;background:#eee;flex:none}
+.chatAvatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#eee;flex:none}
 .chatConversationInfo{min-width:0;flex:1}
 .chatConversationName{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chatConversationPreview{font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
@@ -787,7 +786,7 @@ button{
 .chatPanel{display:flex;flex-direction:column;min-width:0;background:#f8fafc}
 .chatPanelHeader{padding:15px 18px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
 .chatPanelHeaderInfo{min-width:0;flex:1}
-.chatProductMini{width:48px;height:48px;border-radius:10px;object-fit:cover;background:#eee}
+.chatProductMini{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#eee}
 .chatMessages{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:9px}
 .chatEmpty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:#9ca3af;padding:30px}
 .chatBubbleRow{display:flex}
@@ -800,104 +799,47 @@ button{
 .chatComposer textarea{flex:1;resize:none;min-height:46px;max-height:110px;border:1px solid var(--border);border-radius:14px;padding:12px;outline:none}
 .chatComposer textarea:focus{border-color:var(--primary)}
 .chatSendBtn{border:0;background:var(--primary);color:#fff;border-radius:13px;padding:0 18px;font-weight:800}
-.chatProductCard{display:flex;align-items:center;gap:10px;padding:9px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;margin-top:8px}
-.sellerMiniCard{display:flex;align-items:center;gap:10px;margin:14px 0;padding:12px;border:1px solid var(--border);background:#f8fafc;border-radius:14px}
+.sellerMiniCard{display:flex;align-items:center;gap:10px;margin:14px 0;padding:12px;border:1px solid var(--border);background:#f8fafc;border-radius:14px;cursor:pointer;transition:.2s ease}
+.sellerMiniCard:hover{border-color:#c9bfff;box-shadow:0 8px 24px rgba(118,87,255,.10);transform:translateY(-1px)}
 .sellerMiniAvatar{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#ddd}
-.sellerMiniInfo{min-width:0;flex:1}
-.sellerMiniName{font-weight:800}
-.sellerMiniUsername{font-size:12px;color:#6b7280;margin-top:3px}
-.sellerMiniCard{
-    cursor:pointer;
-    transition:.2s ease;
-}
-.sellerMiniCard:hover{
-    border-color:#c9bfff;
-    box-shadow:0 8px 24px rgba(118,87,255,.10);
-    transform:translateY(-1px);
-}
-.sellerMiniCard .sellerChatHint{
-    font-size:12px;
-    color:#7657ff;
-    font-weight:700;
-    margin-top:4px;
-}
-.sellerMenuBox{
-    width:min(430px,100%);
-}
-.sellerMenuProfile{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:8px 0 20px;
-}
-.sellerMenuAvatar{
-    width:72px;
-    height:72px;
-    border-radius:50%;
-    object-fit:cover;
-    background:#eee;
-    border:3px solid #eeeafe;
-}
-.sellerMenuName{
-    font-size:20px;
-    font-weight:850;
-}
-.sellerMenuUsername{
-    color:#748096;
-    font-size:13px;
-    margin-top:4px;
-}
-.sellerMenuProduct{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:12px;
-    border:1px solid var(--border);
-    border-radius:14px;
-    background:#fafbfe;
-    margin-bottom:16px;
-}
-.sellerMenuProduct img{
-    width:58px;
-    height:58px;
-    border-radius:11px;
-    object-fit:cover;
-}
-.sellerMenuProductInfo{min-width:0;flex:1}
-.sellerMenuProductName{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sellerMenuProductPrice{color:var(--primary);font-weight:800;margin-top:4px}
-.sellerMenuActions{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-}
-.sellerMenuAction{
-    width:100%;
-    border:0;
-    border-radius:14px;
-    padding:14px 16px;
-    text-align:left;
-    background:#f5f3ff;
-    color:#4b3bb3;
-    font-weight:800;
-}
-.sellerMenuAction:hover{background:#eeeafe}
-.sellerMenuAction.primary{
-    color:#fff;
-    background:linear-gradient(135deg,#7657ff,#6545e8);
-}
-.sellerMenuAction.primary:hover{background:linear-gradient(135deg,#6849f1,#5437dc)}
+.sellerMiniInfo{min-width:0;flex:1}.sellerMiniName{font-weight:800}.sellerMiniUsername{font-size:12px;color:#6b7280;margin-top:3px}.sellerMiniCard .sellerChatHint{font-size:12px;color:#7657ff;font-weight:700;margin-top:4px}
+.sellerMenuBox{width:min(430px,100%)}
+.sellerMenuProfile{display:flex;align-items:center;gap:15px;padding:8px 0 20px}
+.sellerMenuAvatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#eee;border:3px solid #eeeafe}
+.sellerMenuName{font-size:20px;font-weight:850}.sellerMenuUsername{color:#748096;font-size:13px;margin-top:4px}
+.sellerMenuProduct{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:#fafbfe;margin-bottom:16px}
+.sellerMenuProduct img{width:58px;height:58px;border-radius:11px;object-fit:cover}.sellerMenuProductInfo{min-width:0;flex:1}.sellerMenuProductName{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sellerMenuProductPrice{color:var(--primary);font-weight:800;margin-top:4px}
+.sellerMenuActions{display:grid;grid-template-columns:1fr;gap:10px}.sellerMenuAction{width:100%;border:0;border-radius:14px;padding:14px 16px;text-align:left;background:#f5f3ff;color:#4b3bb3;font-weight:800}.sellerMenuAction.primary{color:#fff;background:linear-gradient(135deg,#7657ff,#6545e8)}
+.chatContactHead{padding:18px;background:#fff;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.chatContactHead img{width:58px;height:58px;border-radius:50%;object-fit:cover;background:#eee}.chatContactHeadInfo{min-width:0;flex:1}.chatContactHeadName{font-size:18px;font-weight:850}.chatContactHeadSub{font-size:12px;color:#6b7280;margin-top:4px}.chatContactActions{padding:12px;background:#fff;display:grid;gap:8px}.chatContactAction{border:0;border-radius:13px;padding:13px 15px;text-align:left;font-weight:800;background:#f5f3ff;color:#4b3bb3}.chatContactAction.primary{background:var(--primary);color:#fff}.chatMobileProfile{cursor:pointer}
+.chatBackBtn{display:none;border:0;background:#f3f4f6;border-radius:10px;width:40px;height:40px;font-size:26px;line-height:1}
 
 @media(max-width:760px){
-  .chatModalBox{height:90vh}
-  .chatLayout{grid-template-columns:1fr}
-  .chatList{display:none}
+  .chatModalBox{width:100%;height:100dvh;max-height:none;border-radius:0;padding:0}
+  .chatLayout{display:block;height:100%}
+  .chatList{display:block;height:100%;border-right:0}
+  .chatPanel{display:none;height:100dvh}
   .chatLayout.mobile-list .chatList{display:block}
   .chatLayout.mobile-list .chatPanel{display:none}
-  .chatPanel{display:flex}
+  .chatLayout.mobile-chat .chatList{display:none}
+  .chatLayout.mobile-chat .chatPanel{display:flex}
+  .chatPanelHeader{padding:10px 12px;min-height:64px}
+  .chatPanelHeader .closeBtn{display:none}
+  .chatPanelHeader .chatBackBtn{display:block}
+  .chatPanelHeader .chatProductMini{width:44px;height:44px}
+  .chatHeaderActions .btn,.chatHeaderActions .chatDangerBtn{padding:7px 8px;font-size:11px}
+  .chatMessages{padding:14px 10px 18px;background:#efeae2}
+  .chatBubble{max-width:86%;font-size:14px;padding:9px 11px}
+  .chatComposer{padding:8px;background:#f0f2f5;align-items:flex-end}
+  .chatComposer textarea{min-height:42px;max-height:100px;border-radius:21px;padding:10px 14px;background:#fff}
+  .chatSendBtn{width:44px;height:44px;border-radius:50%;padding:0;font-size:0}
+  .chatSendBtn::after{content:'➤';font-size:18px}
+  .chatConversation{padding:12px 10px;min-height:70px}
+  .chatAvatar{width:52px;height:52px}
+  .chatConversationName{font-size:15px}
+  .chatConversationPreview{font-size:12px}
+  .chatConversationTime{font-size:10px}
 }
-
-
 
 /* ============================================================
    PEMBATALAN PESANAN OLEH PEMBELI
@@ -2923,34 +2865,22 @@ body.faqih-drawer-open::after{
 ========================================================= -->
 <div id="chatModal" class="modal hidden">
   <div class="modalBox chatModalBox">
-    <div id="chatLayout" class="chatLayout">
+    <div id="chatLayout" class="chatLayout mobile-list">
       <aside class="chatList">
         <div class="chatListHeader">
-          <div>
-            <strong>💬 Chat</strong>
-            <div style="font-size:12px;color:#6b7280;margin-top:3px">Percakapan FaqihMart</div>
-          </div>
+          <div><strong style="font-size:20px">💬 Chat</strong><div style="font-size:12px;color:#6b7280;margin-top:3px">Pesan & percakapan FaqihMart</div></div>
           <button class="closeBtn" type="button" onclick="closeModal('chatModal')">✕</button>
         </div>
-        <div id="chatConversationList">
-          <div class="chatEmpty">Memuat chat...</div>
-        </div>
+        <div id="chatConversationList"><div class="chatEmpty">Memuat chat...</div></div>
       </aside>
       <section class="chatPanel">
         <div id="chatPanelHeader" class="chatPanelHeader">
+          <button class="chatBackBtn" type="button" onclick="backToChatList()" title="Kembali">‹</button>
           <button class="closeBtn" type="button" onclick="closeModal('chatModal')" title="Tutup">✕</button>
-          <div class="chatPanelHeaderInfo">
-            <strong>Chat FaqihMart</strong>
-            <div style="font-size:12px;color:#6b7280">Pilih percakapan di sebelah kiri.</div>
-          </div>
+          <div class="chatPanelHeaderInfo"><strong>Chat FaqihMart</strong><div style="font-size:12px;color:#6b7280">Pilih percakapan.</div></div>
         </div>
-        <div id="chatMessages" class="chatMessages">
-          <div class="chatEmpty"><div><div style="font-size:42px">💬</div><p style="margin-top:10px">Belum memilih percakapan.</p></div></div>
-        </div>
-        <form id="chatComposer" class="chatComposer hidden" onsubmit="sendChatMessage(event)">
-          <textarea id="chatMessageInput" maxlength="2000" placeholder="Tulis pesan..." required></textarea>
-          <button id="chatSendBtn" class="chatSendBtn" type="submit">Kirim</button>
-        </form>
+        <div id="chatMessages" class="chatMessages"><div class="chatEmpty"><div><div style="font-size:42px">💬</div><p style="margin-top:10px">Belum memilih percakapan.</p></div></div></div>
+        <form id="chatComposer" class="chatComposer hidden" onsubmit="sendChatMessage(event)"><textarea id="chatMessageInput" maxlength="5000" placeholder="Tulis pesan..." required></textarea><button id="chatSendBtn" class="chatSendBtn" type="submit">Kirim</button></form>
       </section>
     </div>
   </div>
@@ -3241,245 +3171,70 @@ let cart =
 let dashboardInitialized = false;
 let dashboardRedirecting = false;
 let explicitLogout = false;
-let sessionWatchTimer = null;
-let recoveringSession = false;
+let chatAuthBusy = false;
 
+document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("change", event => { if(event.target?.id === "checkoutPayment") showCheckoutQrisHint(); });
 
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
-
-document.addEventListener("change", event => {
-    if(event.target?.id === "checkoutPayment"){
-        showCheckoutQrisHint();
-    }
-});
-
-
-function sleep(ms){
-    return new Promise(resolve => setTimeout(resolve, ms));
+async function getLiveSession(){
+    try{
+        const {data,error}=await supabaseClient.auth.getSession();
+        if(!error && data?.session?.user){ currentUser=data.session.user; return data.session; }
+        if(error) console.warn("[FaqihMart Auth] getSession:",error.message);
+    }catch(error){ console.warn("[FaqihMart Auth] getSession:",error?.message); }
+    try{
+        const {data,error}=await supabaseClient.auth.getUser();
+        if(!error && data?.user){
+            currentUser=data.user;
+            /* getUser() confirms the Auth user even if local session cache is late. */
+            const {data:sd}=await supabaseClient.auth.getSession();
+            if(sd?.session) return sd.session;
+        }
+        if(error) console.warn("[FaqihMart Auth] getUser:",error.message);
+    }catch(error){ console.warn("[FaqihMart Auth] getUser:",error?.message); }
+    return null;
 }
 
-
-async function getStableSession(){
-
-    // Baca session saja. Supabase menangani auto-refresh token sendiri.
-    // Tidak ada refreshSession() manual untuk mencegah refresh-token race.
+async function requireLiveUser(showError=true){
+    if(chatAuthBusy) return currentUser;
+    chatAuthBusy=true;
     try{
-
-        const {data, error} =
-            await supabaseClient.auth.getSession();
-
-        if(error){
-            console.warn(
-                "[FaqihMart Auth] getSession:",
-                error.message
-            );
-            return null;
-        }
-
-        return data?.session || null;
-
-    }catch(error){
-
-        console.warn(
-            "[FaqihMart Auth] getSession exception:",
-            error
-        );
-
+        const session=await getLiveSession();
+        if(session?.user) return session.user;
+        if(showError) showToast("Sesi login tidak tersedia. Silakan login kembali.",true);
         return null;
-    }
+    }finally{ chatAuthBusy=false; }
 }
-
-
-async function recoverSession(){
-
-    try{
-
-        const session = await getStableSession();
-
-        if(session?.user){
-
-            currentUser = session.user;
-
-            return true;
-        }
-
-        return false;
-
-    }catch(error){
-
-        console.warn(
-            "[FaqihMart Auth] recovery:",
-            error.message
-        );
-
-        return false;
-    }
-}
-
-
-function startSessionWatchdog(){
-
-    /*
-      Tidak ada auth polling.
-      Supabase JS menangani autoRefreshToken secara internal.
-    */
-
-    return;
-}
-
 
 async function redirectToLogin(){
-
     if(dashboardRedirecting) return;
-
-    dashboardRedirecting = true;
-
-    if(sessionWatchTimer){
-        clearInterval(sessionWatchTimer);
-        sessionWatchTimer = null;
-    }
-
+    dashboardRedirecting=true;
     window.location.replace("index.html");
 }
 
-
 async function init(){
-
     try{
-
-        const session = await getStableSession();
-
-        if(!session){
-
-            hideLoading();
-
-            showToast(
-                "Sesi login belum tersedia. Silakan login dari halaman utama.",
-                true
-            );
-
-            return;
-        }
-
-        currentUser = session.user;
-
-        /*
-          Data dashboard boleh gagal satu per satu tanpa membuat
-          session dianggap logout.
-        */
-        try{
-            await loadProfile();
-        }catch(error){
-            console.error("LOAD PROFILE:", error);
-            showToast(
-                "Profil belum dapat dimuat. Fitur lain tetap bisa digunakan.",
-                true
-            );
-        }
-
-        try{
-            await loadProducts();
-        }catch(error){
-            console.error("LOAD PRODUCTS:", error);
-            showToast(
-                "Produk gagal dimuat: " +
-                getErrorMessage(error),
-                true
-            );
-        }
-
-        try{
-            await loadMyOrders();
-        }catch(error){
-            console.error("LOAD ORDERS:", error);
-        }
-
+        const session=await getLiveSession();
+        if(!session){ hideLoading(); showToast("Sesi login belum tersedia. Silakan login dari halaman utama.",true); return; }
+        currentUser=session.user;
+        try{ await loadProfile(); }catch(e){ console.error("LOAD PROFILE:",e); }
+        try{ await loadProducts(); }catch(e){ console.error("LOAD PRODUCTS:",e); showToast("Produk gagal dimuat: "+getErrorMessage(e),true); }
+        try{ await loadMyOrders(); }catch(e){ console.error("LOAD ORDERS:",e); }
         updateCartCount();
-
-        try{
-            await loadSellerData();
-        }catch(error){
-            console.error("LOAD SELLER DATA:", error);
-        }
-
+        try{ await loadSellerData(); }catch(e){ console.error("LOAD SELLER DATA:",e); }
         renderHome();
-
-        try{
-            await loadChatConversations();
-        }catch(error){
-            console.warn(
-                "INITIAL CHAT:",
-                error.message
-            );
-        }
-
+        try{ await loadChatConversations(); }catch(e){ console.warn("INITIAL CHAT:",e?.message); renderChatConversationList(); }
         startChatPolling();
-        startSessionWatchdog();
-
-        dashboardInitialized = true;
-
+        dashboardInitialized=true;
         hideLoading();
-
-    }catch(error){
-
-        console.error(
-            "DASHBOARD INIT ERROR:",
-            error
-        );
-
-        hideLoading();
-
-        /*
-          Jangan logout hanya karena query database gagal.
-        */
-        showToast(
-            "Dashboard mengalami kendala sementara. Coba muat ulang jika ada data yang belum tampil.",
-            true
-        );
-    }
+    }catch(error){ console.error("DASHBOARD INIT ERROR:",error); hideLoading(); showToast("Dashboard mengalami kendala sementara.",true); }
 }
 
-
-/* ============================================================
-   AUTH LISTENER
-============================================================ */
-
-supabaseClient.auth.onAuthStateChange(
-    (event, session) => {
-
-        console.log(
-            "[FaqihMart Auth]",
-            event,
-            session ? "SESSION_OK" : "SESSION_NULL"
-        );
-
-        /*
-          Event auth tidak boleh melakukan query auth, refreshSession,
-          signOut, atau redirect.
-
-          Khusus SIGNED_OUT: hanya dicatat. Logout otomatis dimatikan.
-          Logout hanya terjadi ketika fungsi logout() dipanggil user.
-        */
-        if(session?.user){
-
-            currentUser = session.user;
-
-            return;
-        }
-
-        if(event === "SIGNED_OUT"){
-
-            console.warn(
-                "[FaqihMart Auth] SIGNED_OUT received; " +
-                "automatic redirect disabled."
-            );
-        }
-    }
-);
-
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+    console.log("[FaqihMart Auth]",event,session?.user?.id||"NO_SESSION");
+    if(session?.user) currentUser=session.user;
+    /* SIGNED_OUT tidak memicu redirect otomatis. */
+});
 
 /* ============================================================
    ERROR HELPER
@@ -6852,12 +6607,10 @@ function updateProductStats(){
 ============================================================ */
 
 function closeModal(id){
-
-    document
-        .getElementById(id)
-        .classList.add(
-            "hidden"
-        );
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.classList.add("hidden");
+    if(id === "chatModal") backToChatList();
 }
 
 
@@ -7099,17 +6852,30 @@ function chatTime(value){
     }catch(e){ return ""; }
 }
 
-function openChatInbox(){
+async function openChatInbox(){
+    const user=await requireLiveUser(true);
+    if(!user) return;
     const modal=document.getElementById("chatModal");
     if(!modal) return;
     modal.classList.remove("hidden");
     const layout=document.getElementById("chatLayout");
-    if(layout) layout.classList.remove("mobile-list");
+    if(layout){ layout.classList.add("mobile-list"); layout.classList.remove("mobile-chat"); }
+    activeChatConversationId=null;
+    renderChatEmpty();
     loadChatConversations().catch(e=>showToast("Chat gagal dimuat: "+getErrorMessage(e),true));
 }
 
+function backToChatList(){
+    const layout=document.getElementById("chatLayout");
+    if(layout){ layout.classList.add("mobile-list"); layout.classList.remove("mobile-chat"); }
+    activeChatConversationId=null;
+    renderChatEmpty();
+    renderChatConversationList();
+}
+
 async function openChatForProduct(productId){
-    if(!currentUser){ showToast("Silakan login terlebih dahulu",true); return; }
+    const user=await requireLiveUser(true);
+    if(!user) return;
     const product=(products||[]).find(p=>p.id===productId) || await fetchProductByIdForChat(productId);
     if(!product){ showToast("Produk tidak ditemukan",true); return; }
     if(product.seller_id===currentUser.id){
@@ -7148,7 +6914,8 @@ async function fetchProductByIdForChat(productId){
 }
 
 async function getOrCreateChatConversation(product){
-    if(!currentUser?.id) throw new Error("Sesi login tidak ditemukan.");
+    const user=await requireLiveUser(false);
+    if(!user?.id) throw new Error("UNAUTHENTICATED: sesi Supabase tidak tersedia pada perangkat ini.");
     if(!product?.id || !product?.seller_id) throw new Error("Data produk/penjual tidak lengkap.");
     if(product.seller_id === currentUser.id){
         throw new Error("Kamu tidak bisa membuat chat dengan toko sendiri.");
@@ -7230,7 +6997,8 @@ async function openSellerMenu(productId){
 }
 
 async function loadChatConversations(){
-    if(!currentUser) return;
+    const user=await requireLiveUser(false);
+    if(!user) return;
     if(chatLoading) return;
     chatLoading=true;
     try{
@@ -7270,8 +7038,8 @@ async function loadChatConversations(){
         let profileMap={};
         if(userIds.length){
             const pf=await supabaseClient.rpc("get_nexamart_chat_profiles",{p_user_ids:userIds});
-            if(pf.error) throw pf.error;
-            (pf.data||[]).forEach(p=>profileMap[p.id]=p);
+            if(!pf.error){ (pf.data||[]).forEach(p=>profileMap[p.id]=p); }
+            else console.warn("CHAT PROFILE RPC:",pf.error.message);
         }
 
         const convIds=chatConversations.map(c=>c.id);
@@ -7333,7 +7101,7 @@ function renderChatConversationList(){
             : (product.stores?.name||other?.full_name||other?.username||"Penjual");
         const preview=c.latest?.body || "Belum ada pesan";
         return `<div class="chatConversationRow">
-            <button class="chatConversation ${activeChatConversationId===c.id?'active':''}" onclick="selectChatConversation('${c.id}')">
+            <button class="chatConversation ${activeChatConversationId===c.id?'active':''}" onclick="openChatContactMenu('${c.id}')">
                 <img class="chatAvatar" src="${escapeAttr(avatar)}" alt="">
                 <div class="chatConversationInfo">
                     <div class="chatConversationName">${escapeHtml(name)}</div>
@@ -7356,17 +7124,35 @@ function renderChatEmpty(){
     if(f) f.classList.add("hidden");
 }
 
+function openChatContactMenu(conversationId){
+    const conversation=chatConversations.find(c=>c.id===conversationId);
+    if(!conversation || !currentUser) return;
+    const other=conversation.seller_id===currentUser.id?conversation.buyerProfile:conversation.sellerProfile;
+    const product=conversation.product||{};
+    const name=conversation.seller_id===currentUser.id ? (other?.full_name||other?.username||"Pelanggan") : (product.stores?.name||other?.full_name||other?.username||"Penjual");
+    const avatar=other?.avatar_url||product.stores?.logo_url||makeProductPlaceholder(name);
+    const box=document.getElementById("sellerMenuContent"), modal=document.getElementById("sellerMenuModal");
+    if(!box||!modal) return;
+    box.innerHTML=`<div class="chatContactHead"><img src="${escapeAttr(avatar)}" alt="Foto profil"><div class="chatContactHeadInfo"><div class="chatContactHeadName">${escapeHtml(name)}</div><div class="chatContactHeadSub">${conversation.seller_id===currentUser.id?"Pelanggan":"Penjual"} · ${escapeHtml(product.name||"Produk")}</div></div></div><div class="chatContactActions"><button class="chatContactAction primary" type="button" onclick="closeModal('sellerMenuModal');selectChatConversation('${conversation.id}')">💬 Ketik pesan</button><button class="chatContactAction" type="button" onclick="closeModal('sellerMenuModal');openProductDetail('${product.id}')">🛍️ Lihat produk</button><button class="chatContactAction" type="button" onclick="closeModal('sellerMenuModal');deleteChatConversation(event,'${conversation.id}')">🗑️ Hapus percakapan</button></div>`;
+    modal.classList.remove("hidden");
+}
+
+
 async function selectChatConversation(conversationId){
+    const user=await requireLiveUser(false);
+    if(!user) return;
     const conversation=chatConversations.find(c=>c.id===conversationId);
     if(!conversation) return;
     activeChatConversationId=conversationId;
     const layout=document.getElementById("chatLayout");
-    if(layout && window.innerWidth<=760) layout.classList.remove("mobile-list");
+    if(layout && window.innerWidth<=760){ layout.classList.remove("mobile-list"); layout.classList.add("mobile-chat"); }
     await renderActiveChat(conversation,true);
     renderChatConversationList();
 }
 
 async function renderActiveChat(conversation,markRead=true){
+    const user=await requireLiveUser(false);
+    if(!user) return;
     const h=document.getElementById("chatPanelHeader");
     const m=document.getElementById("chatMessages");
     const f=document.getElementById("chatComposer");
@@ -7379,10 +7165,10 @@ async function renderActiveChat(conversation,markRead=true){
     if(h) h.innerHTML=`
         <button class="closeBtn" type="button" onclick="closeModal('chatModal')">✕</button>
         <img class="chatProductMini" src="${escapeAttr(product.image_url||makeProductPlaceholder(product.name||"Produk"))}" alt="">
-        <div class="chatPanelHeaderInfo">
+        <button type="button" class="chatPanelHeaderInfo chatMobileProfile" style="border:0;background:transparent;text-align:left;padding:0" onclick="openChatContactMenu('${conversation.id}')">
           <strong>${escapeHtml(name)}</strong>
           <div style="font-size:12px;color:#6b7280">${escapeHtml(product.name||"Produk")} · ${isSeller?"Pelanggan":"Penjual"}</div>
-        </div>
+        </button>
         <div class="chatHeaderActions">
           <button type="button" class="btn" onclick="openProductDetail('${product.id}')">Lihat Produk</button>
           <button type="button" class="chatDangerBtn" onclick="deleteChatConversation(event,'${conversation.id}')" title="Hapus percakapan">🗑️ Hapus</button>
@@ -7442,7 +7228,9 @@ async function sendChatMessage(event){
 
     event.preventDefault();
 
-    if(!activeChatConversationId || !currentUser) return;
+    const user=await requireLiveUser(true);
+    if(!user) return;
+    if(!activeChatConversationId) return;
 
     const input =
         document.getElementById("chatMessageInput");
@@ -7489,12 +7277,15 @@ async function sendChatMessage(event){
                 }
             );
 
-        if(error) throw error;
+        if(error){
+            if(error.message?.includes("UNAUTHENTICATED")){
+                throw new Error("Sesi Supabase pada perangkat ini belum aktif. Silakan login ulang.");
+            }
+            throw error;
+        }
 
         if(!data){
-            throw new Error(
-                "Pesan tidak berhasil dikirim."
-            );
+            throw new Error("Pesan tidak berhasil dikirim.");
         }
 
         input.value = "";
