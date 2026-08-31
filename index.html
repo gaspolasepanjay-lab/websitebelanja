@@ -1,0 +1,2996 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>FaqihMart</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    min-height:100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eeeaff,
+            #f8f8fc
+        );
+
+    color:#202124;
+
+}
+
+button,
+input,
+textarea{
+
+    font-family:inherit;
+
+}
+
+button{
+
+    cursor:pointer;
+
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:25px;
+
+}
+
+.auth-container{
+
+    width:100%;
+
+    max-width:1050px;
+
+    min-height:650px;
+
+    background:white;
+
+    border-radius:30px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 25px 70px
+        rgba(0,0,0,.12);
+
+    display:grid;
+
+    grid-template-columns:
+        45% 55%;
+
+}
+
+/* =========================================================
+   LEFT
+========================================================= */
+
+.left{
+
+    padding:55px;
+
+    color:white;
+
+    background:
+        radial-gradient(
+            circle at 80% 15%,
+            rgba(255,255,255,.2),
+            transparent 25%
+        ),
+        linear-gradient(
+            145deg,
+            #6d54ed,
+            #402bb6
+        );
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+}
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-size:24px;
+
+    font-weight:800;
+
+    margin-bottom:60px;
+
+}
+
+.logo-icon{
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:14px;
+
+    background:white;
+
+    color:#6249df;
+
+    display:grid;
+
+    place-items:center;
+
+    font-size:22px;
+
+}
+
+.left h1{
+
+    font-size:48px;
+
+    line-height:1.08;
+
+    margin-bottom:20px;
+
+}
+
+.left p{
+
+    color:#e9e5ff;
+
+    line-height:1.7;
+
+    font-size:15px;
+
+    max-width:420px;
+
+}
+
+.shopping-icons{
+
+    margin-top:45px;
+
+    font-size:65px;
+
+    letter-spacing:10px;
+
+}
+
+/* =========================================================
+   RIGHT
+========================================================= */
+
+.right{
+
+    padding:45px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    overflow:auto;
+
+}
+
+.title{
+
+    font-size:30px;
+
+    margin-bottom:7px;
+
+}
+
+.subtitle{
+
+    color:#888;
+
+    font-size:14px;
+
+    margin-bottom:25px;
+
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.tabs{
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:5px;
+
+    padding:5px;
+
+    background:#f1f0f5;
+
+    border-radius:13px;
+
+    margin-bottom:25px;
+
+}
+
+.tab{
+
+    border:none;
+
+    background:transparent;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    font-weight:bold;
+
+    color:#777;
+
+}
+
+.tab.active{
+
+    background:white;
+
+    color:#6048d9;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.08);
+
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.message{
+
+    display:none;
+
+    padding:13px 15px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+    line-height:1.5;
+
+    margin-bottom:18px;
+
+}
+
+.message.show{
+
+    display:block;
+
+}
+
+.message.error{
+
+    background:#ffe7e7;
+
+    color:#b32626;
+
+}
+
+.message.success{
+
+    background:#e5f8eb;
+
+    color:#20753a;
+
+}
+
+.message.info{
+
+    background:#e9edff;
+
+    color:#3949ab;
+
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form{
+
+    display:none;
+
+}
+
+.form.active{
+
+    display:block;
+
+}
+
+.form-group{
+
+    margin-bottom:15px;
+
+}
+
+.form-group label{
+
+    display:block;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    margin-bottom:7px;
+
+}
+
+.form-group input,
+.form-group textarea{
+
+    width:100%;
+
+    padding:13px 14px;
+
+    border:
+
+        1px solid #ddd;
+
+    border-radius:11px;
+
+    outline:none;
+
+    transition:.2s;
+
+    background:white;
+
+}
+
+.form-group input:focus,
+.form-group textarea:focus{
+
+    border-color:#6850e6;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(104,80,230,.09);
+
+}
+
+.form-group textarea{
+
+    min-height:80px;
+
+    resize:vertical;
+
+}
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+.password-box{
+
+    position:relative;
+
+}
+
+.password-box input{
+
+    padding-right:48px;
+
+}
+
+.password-toggle{
+
+    position:absolute;
+
+    right:10px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    border:none;
+
+    background:transparent;
+
+    font-size:18px;
+
+}
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.avatar-section{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin-bottom:20px;
+
+}
+
+.avatar-preview{
+
+    width:85px;
+
+    height:85px;
+
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    background:#eeeafd;
+
+    border:3px solid #eee9ff;
+
+    overflow:hidden;
+
+    display:grid;
+
+    place-items:center;
+
+    font-size:30px;
+
+}
+
+.avatar-preview img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.avatar-controls{
+
+    flex:1;
+
+}
+
+.avatar-controls strong{
+
+    display:block;
+
+    font-size:13px;
+
+    margin-bottom:5px;
+
+}
+
+.avatar-controls span{
+
+    display:block;
+
+    color:#999;
+
+    font-size:11px;
+
+    margin-bottom:9px;
+
+}
+
+.file-button{
+
+    display:inline-block;
+
+    padding:9px 13px;
+
+    background:#f0edff;
+
+    color:#5941d3;
+
+    border-radius:9px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+.file-button input{
+
+    display:none;
+
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:0 12px;
+
+}
+
+/* =========================================================
+   MAIN BUTTON
+========================================================= */
+
+.main-button{
+
+    width:100%;
+
+    border:none;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6d54ed,
+            #4d37c9
+        );
+
+    color:white;
+
+    font-weight:bold;
+
+    font-size:14px;
+
+    margin-top:5px;
+
+    transition:.2s;
+
+}
+
+.main-button:hover{
+
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(91,69,223,.25);
+
+}
+
+.main-button:disabled{
+
+    opacity:.65;
+
+    cursor:not-allowed;
+
+    transform:none;
+
+}
+
+/* =========================================================
+   SMALL TEXT
+========================================================= */
+
+.bottom-text{
+
+    text-align:center;
+
+    color:#999;
+
+    font-size:12px;
+
+    margin-top:17px;
+
+}
+
+.bottom-text b{
+
+    color:#5c44d7;
+
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.spinner{
+
+    width:16px;
+
+    height:16px;
+
+    border:
+
+        2px solid
+        rgba(255,255,255,.5);
+
+    border-top-color:white;
+
+    border-radius:50%;
+
+    display:inline-block;
+
+    vertical-align:middle;
+
+    margin-right:7px;
+
+    animation:
+        spin .7s linear infinite;
+
+}
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:800px){
+
+    .page{
+
+        padding:15px;
+
+    }
+
+    .auth-container{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .left{
+
+        padding:35px;
+
+        min-height:280px;
+
+    }
+
+    .left h1{
+
+        font-size:35px;
+
+    }
+
+    .logo{
+
+        margin-bottom:30px;
+
+    }
+
+    .shopping-icons{
+
+        display:none;
+
+    }
+
+    .right{
+
+        padding:30px 22px;
+
+    }
+
+}
+
+@media(max-width:550px){
+
+    .form-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .left{
+
+        padding:30px 25px;
+
+    }
+
+    .right{
+
+        padding:25px 18px;
+
+    }
+
+    .left h1{
+
+        font-size:32px;
+
+    }
+
+    .title{
+
+        font-size:25px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div class="page">
+
+<div class="auth-container">
+
+
+<!-- =====================================================
+     LEFT
+===================================================== -->
+
+<section class="left">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            ✦
+        </div>
+
+        FaqihMart
+
+    </div>
+
+    <h1>
+        Belanja lebih murah di FaqihMart..
+    </h1>
+
+    <p>
+        Buat akun untuk berbelanja, menjual produk,
+        dan mengelola toko kamu sendiri.
+    </p>
+
+    <div class="shopping-icons">
+        🛍️ 📦 🛒
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RIGHT
+===================================================== -->
+
+<section class="right">
+
+
+<h2 class="title" id="pageTitle">
+    login
+</h2>
+
+<p class="subtitle" id="pageSubtitle">
+    Masuk ke akun FaqihMart kamu.
+</p>
+
+
+<!-- =====================================================
+     TABS
+===================================================== -->
+
+<div class="tabs">
+
+    <button
+        class="tab active"
+        id="loginTab"
+        onclick="switchMode('login')"
+    >
+        Masuk
+    </button>
+
+    <button
+        class="tab"
+        id="registerTab"
+        onclick="switchMode('register')"
+    >
+        Buat Akun
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     MESSAGE
+===================================================== -->
+
+<div
+    class="message"
+    id="message"
+></div>
+
+
+<!-- =====================================================
+     LOGIN FORM
+===================================================== -->
+
+<form
+    class="form active"
+    id="loginForm"
+    onsubmit="login(event)"
+>
+
+    <div class="form-group">
+
+        <label>
+            Email
+        </label>
+
+        <input
+            type="email"
+            id="loginEmail"
+            placeholder="nama@email.com"
+            autocomplete="email"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>
+            Password
+        </label>
+
+        <div class="password-box">
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('loginPassword', this)"
+            >
+                👁️
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="main-button"
+        id="loginButton"
+        type="submit"
+    >
+        Masuk
+    </button>
+
+
+    <div class="bottom-text">
+
+        Belum punya akun?
+
+        <b
+            onclick="switchMode('register')"
+            style="cursor:pointer"
+        >
+            Buat akun
+        </b>
+
+    </div>
+
+</form>
+
+
+<!-- =====================================================
+     REGISTER FORM
+===================================================== -->
+
+<form
+    class="form"
+    id="registerForm"
+    onsubmit="register(event)"
+>
+
+
+<!-- FOTO PROFIL -->
+
+<div class="avatar-section">
+
+    <div
+        class="avatar-preview"
+        id="avatarPreview"
+    >
+        👤
+    </div>
+
+    <div class="avatar-controls">
+
+        <strong>
+            Foto Profil
+        </strong>
+
+        <span>
+            JPG, PNG atau WEBP. Maksimal 5 MB.
+        </span>
+
+        <label class="file-button">
+
+            📷 Pilih Foto
+
+            <input
+                type="file"
+                id="avatarInput"
+                accept="image/png,image/jpeg,image/webp"
+                onchange="previewAvatar(event)"
+            >
+
+        </label>
+
+    </div>
+
+</div>
+
+
+<!-- USERNAME -->
+
+<div class="form-grid">
+
+    <div class="form-group">
+
+        <label>
+            Username
+        </label>
+
+        <input
+            type="text"
+            id="registerUsername"
+            placeholder="contoh: asepmart"
+            autocomplete="username"
+            minlength="3"
+            maxlength="30"
+            required
+        >
+
+    </div>
+
+
+    <!-- NAMA -->
+
+    <div class="form-group">
+
+        <label>
+            Nama Lengkap
+        </label>
+
+        <input
+            type="text"
+            id="registerFullName"
+            placeholder="Nama lengkap"
+            autocomplete="name"
+            maxlength="80"
+            required
+        >
+
+    </div>
+
+</div>
+
+
+<!-- EMAIL -->
+
+<div class="form-group">
+
+    <label>
+        Email
+    </label>
+
+    <input
+        type="email"
+        id="registerEmail"
+        placeholder="nama@email.com"
+        autocomplete="email"
+        required
+    >
+
+</div>
+
+
+<!-- HP -->
+
+<div class="form-group">
+
+    <label>
+        Nomor HP
+    </label>
+
+    <input
+        type="tel"
+        id="registerPhone"
+        placeholder="08xxxxxxxxxx"
+        autocomplete="tel"
+        maxlength="20"
+        required
+    >
+
+</div>
+
+
+<!-- PASSWORD -->
+
+<div class="form-group">
+
+    <label>
+        Password
+    </label>
+
+    <div class="password-box">
+
+        <input
+            type="password"
+            id="registerPassword"
+            placeholder="Minimal 6 karakter"
+            autocomplete="new-password"
+            minlength="6"
+            required
+        >
+
+        <button
+            type="button"
+            class="password-toggle"
+            onclick="togglePassword('registerPassword', this)"
+        >
+            👁️
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ALAMAT -->
+
+<div class="form-group">
+
+    <label>
+        Alamat
+    </label>
+
+    <textarea
+        id="registerAddress"
+        placeholder="Masukkan alamat lengkap"
+        maxlength="500"
+        required
+    ></textarea>
+
+</div>
+
+
+<button
+    class="main-button"
+    id="registerButton"
+    type="submit"
+>
+
+    Buat Akun
+
+</button>
+
+
+<div class="bottom-text">
+
+    Sudah punya akun?
+
+    <b
+        onclick="switchMode('login')"
+        style="cursor:pointer"
+    >
+        Masuk
+
+    </b>
+
+</div>
+
+
+</form>
+
+
+</section>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+/*
+   CUKUP GANTI PROJECT ID INI
+   JIKA NANTI MENGGUNAKAN PROJECT SUPABASE LAIN.
+*/
+
+const SUPABASE_PROJECT_ID =
+    "owaoeugipnomzsfkclbm";
+
+
+const SUPABASE_URL =
+    "https://" +
+    SUPABASE_PROJECT_ID +
+    ".supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_xTiA5qZs0ux_FT7C64m4NQ_JiicYJ2l";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let selectedAvatarFile = null;
+
+let isProcessing = false;
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        /*
+           Kalau user ternyata sudah login,
+           langsung ke dashboard.
+        */
+
+        const {
+            data
+        } =
+            await supabaseClient
+                .auth
+                .getSession();
+
+
+        if(data?.session){
+
+            window.location.href =
+                "dashboard.html";
+
+            return;
+
+        }
+
+
+        /*
+           Jika sebelumnya ada foto yang tertunda
+           karena email confirmation,
+           foto tetap dipertahankan.
+        */
+
+        restorePendingAvatar();
+
+    }
+);
+
+
+/* =========================================================
+   SWITCH LOGIN / REGISTER
+========================================================= */
+
+function switchMode(mode){
+
+    clearMessage();
+
+
+    const loginTab =
+        document.getElementById(
+            "loginTab"
+        );
+
+
+    const registerTab =
+        document.getElementById(
+            "registerTab"
+        );
+
+
+    const loginForm =
+        document.getElementById(
+            "loginForm"
+        );
+
+
+    const registerForm =
+        document.getElementById(
+            "registerForm"
+        );
+
+
+    const title =
+        document.getElementById(
+            "pageTitle"
+        );
+
+
+    const subtitle =
+        document.getElementById(
+            "pageSubtitle"
+        );
+
+
+    if(mode === "login"){
+
+        loginTab.classList.add(
+            "active"
+        );
+
+        registerTab.classList.remove(
+            "active"
+        );
+
+        loginForm.classList.add(
+            "active"
+        );
+
+        registerForm.classList.remove(
+            "active"
+        );
+
+        title.textContent =
+            "Masuk";
+
+        subtitle.textContent =
+            "Masuk ke akun FaqihMart kamu.";
+
+    }
+
+    else{
+
+        registerTab.classList.add(
+            "active"
+        );
+
+        loginTab.classList.remove(
+            "active"
+        );
+
+        registerForm.classList.add(
+            "active"
+        );
+
+        loginForm.classList.remove(
+            "active"
+        );
+
+        title.textContent =
+            "Buat Akun";
+
+        subtitle.textContent =
+            "Daftar akun baru di FaqihMart.";
+
+    }
+
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+    text,
+    type = "error"
+){
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+
+    box.textContent =
+        text;
+
+
+    box.className =
+        "message show " +
+        type;
+
+}
+
+
+function clearMessage(){
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+
+    box.textContent =
+        "";
+
+
+    box.className =
+        "message";
+
+}
+
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+function togglePassword(
+    inputId,
+    button
+){
+
+    const input =
+        document.getElementById(
+            inputId
+        );
+
+
+    if(
+        input.type ===
+        "password"
+    ){
+
+        input.type =
+            "text";
+
+        button.textContent =
+            "🙈";
+
+    }
+
+    else{
+
+        input.type =
+            "password";
+
+        button.textContent =
+            "👁️";
+
+    }
+
+}
+
+
+/* =========================================================
+   AVATAR PREVIEW
+========================================================= */
+
+function previewAvatar(event){
+
+    const file =
+        event.target.files?.[0];
+
+
+    if(!file)
+        return;
+
+
+    /*
+       Validasi tipe file
+    */
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+
+    if(
+        !allowedTypes.includes(
+            file.type
+        )
+    ){
+
+        showMessage(
+            "Foto harus JPG, PNG, atau WEBP."
+        );
+
+        event.target.value =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+       Maksimal 5 MB
+    */
+
+    if(
+        file.size >
+        5 * 1024 * 1024
+    ){
+
+        showMessage(
+            "Ukuran foto maksimal 5 MB."
+        );
+
+        event.target.value =
+            "";
+
+        return;
+
+    }
+
+
+    selectedAvatarFile =
+        file;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(){
+
+            document.getElementById(
+                "avatarPreview"
+            ).innerHTML = `
+
+                <img
+                    src="${reader.result}"
+                    alt="Preview foto"
+                >
+
+            `;
+
+        };
+
+
+    reader.readAsDataURL(file);
+
+
+    /*
+       Simpan versi terkompresi secara sementara.
+       Ini berguna jika Supabase meminta konfirmasi email.
+    */
+
+    compressImage(
+        file,
+        500,
+        500,
+        0.78
+    )
+    .then(
+        compressed => {
+
+            const reader2 =
+                new FileReader();
+
+
+            reader2.onload =
+                function(){
+
+                    try{
+
+                        localStorage.setItem(
+                            "nexamart_pending_avatar",
+                            reader2.result
+                        );
+
+                    }
+                    catch(error){
+
+                        console.warn(
+                            "Foto terlalu besar untuk localStorage.",
+                            error
+                        );
+
+                    }
+
+                };
+
+
+            reader2.readAsDataURL(
+                compressed
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   COMPRESS IMAGE
+========================================================= */
+
+function compressImage(
+    file,
+    maxWidth,
+    maxHeight,
+    quality
+){
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(event){
+
+                    const img =
+                        new Image();
+
+
+                    img.onload =
+                        function(){
+
+                            let width =
+                                img.width;
+
+                            let height =
+                                img.height;
+
+
+                            /*
+                               Resize proporsional
+                            */
+
+                            if(
+                                width >
+                                maxWidth
+                            ){
+
+                                height =
+                                    Math.round(
+                                        height *
+                                        maxWidth /
+                                        width
+                                    );
+
+                                width =
+                                    maxWidth;
+
+                            }
+
+
+                            if(
+                                height >
+                                maxHeight
+                            ){
+
+                                width =
+                                    Math.round(
+                                        width *
+                                        maxHeight /
+                                        height
+                                    );
+
+                                height =
+                                    maxHeight;
+
+                            }
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+
+                            canvas.width =
+                                width;
+
+                            canvas.height =
+                                height;
+
+
+                            const ctx =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            ctx.drawImage(
+                                img,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            canvas.toBlob(
+                                blob => {
+
+                                    if(!blob){
+
+                                        reject(
+                                            new Error(
+                                                "Gagal mengompres foto."
+                                            )
+                                        );
+
+                                        return;
+
+                                    }
+
+
+                                    resolve(
+                                        new File(
+                                            [
+                                                blob
+                                            ],
+                                            "avatar.jpg",
+                                            {
+                                                type:
+                                                    "image/jpeg"
+                                            }
+                                        )
+                                    );
+
+                                },
+                                "image/jpeg",
+                                quality
+                            );
+
+                        };
+
+
+                    img.onerror =
+                        reject;
+
+
+                    img.src =
+                        event.target.result;
+
+                };
+
+
+            reader.onerror =
+                reject;
+
+
+            reader.readAsDataURL(file);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   REGISTER
+========================================================= */
+
+async function register(event){
+
+    event.preventDefault();
+
+
+    if(isProcessing)
+        return;
+
+
+    clearMessage();
+
+
+    const username =
+        document
+            .getElementById(
+                "registerUsername"
+            )
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const fullName =
+        document
+            .getElementById(
+                "registerFullName"
+            )
+            .value
+            .trim();
+
+
+    const email =
+        document
+            .getElementById(
+                "registerEmail"
+            )
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const phone =
+        document
+            .getElementById(
+                "registerPhone"
+            )
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById(
+                "registerPassword"
+            )
+            .value;
+
+
+    const address =
+        document
+            .getElementById(
+                "registerAddress"
+            )
+            .value
+            .trim();
+
+
+    /*
+       Validasi username
+    */
+
+    if(
+        !/^[a-z0-9_]+$/i.test(
+            username
+        )
+    ){
+
+        showMessage(
+            "Username hanya boleh menggunakan huruf, angka, dan underscore."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        username.length <
+        3
+    ){
+
+        showMessage(
+            "Username minimal 3 karakter."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        password.length <
+        6
+    ){
+
+        showMessage(
+            "Password minimal 6 karakter."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        phone.length <
+        8
+    ){
+
+        showMessage(
+            "Nomor HP tidak valid."
+        );
+
+        return;
+
+    }
+
+
+    setLoading(
+        "registerButton",
+        true,
+        "Membuat akun..."
+    );
+
+
+    isProcessing =
+        true;
+
+
+    try{
+
+        /*
+           =================================================
+           CEK USERNAME
+           =================================================
+        */
+
+        const {
+            data: existingProfile,
+            error: usernameError
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select("id")
+                .eq(
+                    "username",
+                    username
+                )
+                .maybeSingle();
+
+
+        if(usernameError){
+
+            /*
+               Jika error karena policy/database,
+               tampilkan informasi.
+            */
+
+            console.error(
+                usernameError
+            );
+
+            throw new Error(
+                "Tidak bisa memeriksa username. Pastikan tabel profiles sudah benar."
+            );
+
+        }
+
+
+        if(existingProfile){
+
+            throw new Error(
+                "Username tersebut sudah digunakan. Silakan pilih username lain."
+            );
+
+        }
+
+
+        /*
+           =================================================
+           SIGN UP AUTH
+           =================================================
+        */
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .auth
+                .signUp({
+
+                    email:
+                        email,
+
+                    password:
+                        password,
+
+                    options:{
+
+                        data:{
+
+                            username:
+                                username,
+
+                            full_name:
+                                fullName,
+
+                            phone:
+                                phone,
+
+                            address:
+                                address
+
+                        }
+
+                    }
+
+                });
+
+
+        if(error){
+
+            console.error(
+                "Signup error:",
+                error
+            );
+
+            throw new Error(
+                translateSupabaseError(
+                    error
+                )
+            );
+
+        }
+
+
+        /*
+           =================================================
+           USER
+           =================================================
+        */
+
+        const user =
+            data?.user;
+
+
+        if(!user){
+
+            throw new Error(
+                "Akun tidak berhasil dibuat. Silakan coba lagi."
+            );
+
+        }
+
+
+        /*
+           =================================================
+           PROFILE
+           =================================================
+           Trigger Supabase biasanya membuat profile.
+           Tetapi kalau belum ada, kita coba insert.
+        */
+
+        await ensureProfile(
+            user.id,
+            {
+                username:
+                    username,
+
+                full_name:
+                    fullName,
+
+                phone:
+                    phone,
+
+                address:
+                    address,
+
+                is_seller:
+                    false
+            }
+        );
+
+
+        /*
+           =================================================
+           SESSION ADA
+           =================================================
+        */
+
+        if(data.session){
+
+            /*
+               User langsung login.
+               Kita upload foto sekarang.
+            */
+
+            if(selectedAvatarFile){
+
+                await uploadAvatar(
+                    user
+                );
+
+            }
+
+            localStorage.removeItem(
+                "nexamart_pending_avatar"
+            );
+
+
+            showMessage(
+                "Akun berhasil dibuat. Mengarahkan ke dashboard...",
+                "success"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "dashboard.html";
+
+                },
+                800
+            );
+
+            return;
+
+        }
+
+
+        /*
+           =================================================
+           EMAIL CONFIRMATION
+           =================================================
+        */
+
+        /*
+           Session null biasanya berarti
+           email confirmation sedang aktif.
+        */
+
+        showMessage(
+            "Akun berhasil dibuat. Silakan cek email untuk konfirmasi. Setelah itu kembali ke sini dan login. Foto profil kamu akan diproses setelah login.",
+            "success"
+        );
+
+
+        /*
+           Pindah ke login setelah beberapa detik
+        */
+
+        setTimeout(
+            () => {
+
+                switchMode(
+                    "login"
+                );
+
+                document.getElementById(
+                    "loginEmail"
+                ).value =
+                    email;
+
+                document.getElementById(
+                    "loginPassword"
+                ).value =
+                    "";
+
+            },
+            2500
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Terjadi kesalahan saat membuat akun."
+        );
+
+    }
+    finally{
+
+        isProcessing =
+            false;
+
+        setLoading(
+            "registerButton",
+            false,
+            "Buat Akun"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ENSURE PROFILE
+========================================================= */
+
+async function ensureProfile(
+    userId,
+    profile
+){
+
+    const {
+        data: existing,
+        error: selectError
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select("id")
+            .eq(
+                "id",
+                userId
+            )
+            .maybeSingle();
+
+
+    if(selectError){
+
+        console.warn(
+            "Profile select:",
+            selectError
+        );
+
+    }
+
+
+    /*
+       Kalau trigger sudah membuat profile,
+       jangan insert lagi.
+    */
+
+    if(existing)
+        return;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .insert({
+
+                id:
+                    userId,
+
+                username:
+                    profile.username,
+
+                full_name:
+                    profile.full_name,
+
+                phone:
+                    profile.phone,
+
+                address:
+                    profile.address,
+
+                is_seller:
+                    profile.is_seller,
+
+                avatar_url:
+                    null
+
+            });
+
+
+    if(error){
+
+        console.error(
+            "Profile insert:",
+            error
+        );
+
+        /*
+           Jangan menggagalkan akun jika
+           trigger database sudah bekerja.
+        */
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function login(event){
+
+    event.preventDefault();
+
+
+    if(isProcessing)
+        return;
+
+
+    clearMessage();
+
+
+    const email =
+        document
+            .getElementById(
+                "loginEmail"
+            )
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const password =
+        document
+            .getElementById(
+                "loginPassword"
+            )
+            .value;
+
+
+    if(
+        !email ||
+        !password
+    ){
+
+        showMessage(
+            "Masukkan email dan password."
+        );
+
+        return;
+
+    }
+
+
+    setLoading(
+        "loginButton",
+        true,
+        "Memproses..."
+    );
+
+
+    isProcessing =
+        true;
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .auth
+                .signInWithPassword({
+
+                    email:
+                        email,
+
+                    password:
+                        password
+
+                });
+
+
+        if(error){
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            throw new Error(
+                translateSupabaseError(
+                    error
+                )
+            );
+
+        }
+
+
+        const user =
+            data?.user;
+
+
+        if(!user){
+
+            throw new Error(
+                "Login gagal."
+            );
+
+        }
+
+
+        /*
+           =================================================
+           PROFILE
+           =================================================
+        */
+
+        await createMissingProfileFromAuth(
+            user
+        );
+
+
+        /*
+           =================================================
+           PENDING AVATAR
+           =================================================
+        */
+
+        await uploadPendingAvatar(
+            user
+        );
+
+
+        showMessage(
+            "Login berhasil. Mengarahkan ke dashboard...",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "dashboard.html";
+
+            },
+            700
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Login gagal."
+        );
+
+    }
+    finally{
+
+        isProcessing =
+            false;
+
+        setLoading(
+            "loginButton",
+            false,
+            "Masuk"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CREATE MISSING PROFILE
+========================================================= */
+
+async function createMissingProfileFromAuth(
+    user
+){
+
+    try{
+
+        const {
+            data
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select("id")
+                .eq(
+                    "id",
+                    user.id
+                )
+                .maybeSingle();
+
+
+        if(data)
+            return;
+
+
+        const metadata =
+            user.user_metadata ||
+            {};
+
+
+        await supabaseClient
+            .from("profiles")
+            .insert({
+
+                id:
+                    user.id,
+
+                username:
+                    metadata.username ||
+                    (
+                        user.email
+                        ?
+                        user.email
+                            .split("@")[0]
+                            .replace(
+                                /[^a-zA-Z0-9_]/g,
+                                ""
+                            )
+                        :
+                        "user"
+                    ),
+
+                full_name:
+                    metadata.full_name ||
+                    "",
+
+                phone:
+                    metadata.phone ||
+                    "",
+
+                address:
+                    metadata.address ||
+                    "",
+
+                avatar_url:
+                    null,
+
+                is_seller:
+                    false
+
+            });
+
+    }
+    catch(error){
+
+        console.warn(
+            "Profile auto create:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UPLOAD AVATAR
+========================================================= */
+
+async function uploadAvatar(
+    user
+){
+
+    if(
+        !user ||
+        !selectedAvatarFile
+    ){
+
+        return null;
+
+    }
+
+
+    /*
+       Kompres foto
+    */
+
+    const compressed =
+        await compressImage(
+            selectedAvatarFile,
+            600,
+            600,
+            0.80
+        );
+
+
+    /*
+       Nama file berdasarkan user ID.
+       Jadi setiap user mempunyai folder sendiri.
+    */
+
+    const filePath =
+        user.id +
+        "/avatar.jpg";
+
+
+    /*
+       Upload / overwrite
+    */
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClient
+            .storage
+            .from("avatars")
+            .upload(
+                filePath,
+                compressed,
+                {
+
+                    cacheControl:
+                        "3600",
+
+                    upsert:
+                        true,
+
+                    contentType:
+                        "image/jpeg"
+
+                }
+            );
+
+
+    if(uploadError){
+
+        console.error(
+            "Avatar upload error:",
+            uploadError
+        );
+
+        /*
+           Jangan membuat login gagal
+           hanya karena foto gagal upload.
+        */
+
+        showMessage(
+            "Akun berhasil dibuat, tetapi foto profil belum berhasil diupload. Kamu bisa coba lagi nanti.",
+            "info"
+        );
+
+        return null;
+
+    }
+
+
+    /*
+       Public URL
+    */
+
+    const {
+        data
+    } =
+        supabaseClient
+            .storage
+            .from("avatars")
+            .getPublicUrl(
+                filePath
+            );
+
+
+    const avatarUrl =
+        data?.publicUrl;
+
+
+    if(!avatarUrl){
+
+        return null;
+
+    }
+
+
+    /*
+       Simpan URL ke profiles
+    */
+
+    const {
+        error: profileError
+    } =
+        await supabaseClient
+            .from("profiles")
+            .update({
+
+                avatar_url:
+                    avatarUrl
+
+            })
+            .eq(
+                "id",
+                user.id
+            );
+
+
+    if(profileError){
+
+        console.error(
+            "Avatar profile update:",
+            profileError
+        );
+
+        return null;
+
+    }
+
+
+    return avatarUrl;
+
+}
+
+
+/* =========================================================
+   PENDING AVATAR
+========================================================= */
+
+async function uploadPendingAvatar(
+    user
+){
+
+    const pending =
+        localStorage.getItem(
+            "nexamart_pending_avatar"
+        );
+
+
+    if(!pending)
+        return;
+
+
+    try{
+
+        const response =
+            await fetch(
+                pending
+            );
+
+
+        const blob =
+            await response.blob();
+
+
+        const file =
+            new File(
+                [
+                    blob
+                ],
+                "avatar.jpg",
+                {
+                    type:
+                        "image/jpeg"
+                }
+            );
+
+
+        selectedAvatarFile =
+            file;
+
+
+        await uploadAvatar(
+            user
+        );
+
+
+        localStorage.removeItem(
+            "nexamart_pending_avatar"
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Pending avatar error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESTORE PENDING AVATAR
+========================================================= */
+
+function restorePendingAvatar(){
+
+    const pending =
+        localStorage.getItem(
+            "nexamart_pending_avatar"
+        );
+
+
+    if(!pending)
+        return;
+
+
+    /*
+       Kita hanya mengembalikan preview
+       kalau user membuka halaman register.
+    */
+
+    const img =
+        document.createElement(
+            "img"
+        );
+
+
+    img.src =
+        pending;
+
+    img.alt =
+        "Foto profil";
+
+    img.onload =
+        function(){
+
+            document.getElementById(
+                "avatarPreview"
+            ).innerHTML =
+                "";
+
+            document.getElementById(
+                "avatarPreview"
+            ).appendChild(
+                img
+            );
+
+        };
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function setLoading(
+    buttonId,
+    loading,
+    text
+){
+
+    const button =
+        document.getElementById(
+            buttonId
+        );
+
+
+    if(!button)
+        return;
+
+
+    button.disabled =
+        loading;
+
+
+    if(loading){
+
+        button.innerHTML = `
+
+            <span class="spinner"></span>
+
+            ${text}
+
+        `;
+
+    }
+
+    else{
+
+        button.textContent =
+            text;
+
+    }
+
+}
+
+
+/* =========================================================
+   SUPABASE ERROR TRANSLATOR
+========================================================= */
+
+function translateSupabaseError(
+    error
+){
+
+    const message =
+        (
+            error?.message ||
+            ""
+        ).toLowerCase();
+
+
+    if(
+        message.includes(
+            "too many requests"
+        ) ||
+        message.includes(
+            "rate limit"
+        ) ||
+        message.includes(
+            "too many"
+        )
+    ){
+
+        return (
+            "Terlalu banyak percobaan. " +
+            "Jangan tekan tombol berulang kali. " +
+            "Tunggu beberapa menit sebelum mencoba lagi."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "user already registered"
+        )
+    ){
+
+        return (
+            "Email tersebut sudah terdaftar. " +
+            "Silakan masuk menggunakan akun tersebut."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "invalid login credentials"
+        )
+    ){
+
+        return (
+            "Email atau password salah."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "email not confirmed"
+        )
+    ){
+
+        return (
+            "Email kamu belum dikonfirmasi. " +
+            "Silakan buka email konfirmasi dari Supabase."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "password should be at least"
+        )
+    ){
+
+        return (
+            "Password terlalu pendek."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "invalid email"
+        )
+    ){
+
+        return (
+            "Format email tidak valid."
+        );
+
+    }
+
+
+    if(
+        message.includes(
+            "row-level security"
+        ) ||
+        message.includes(
+            "rls"
+        )
+    ){
+
+        return (
+            "Akses database ditolak oleh RLS. " +
+            "Pastikan SQL FaqihMart sudah dijalankan."
+        );
+
+    }
+
+
+    return (
+        error?.message ||
+        "Terjadi kesalahan. Silakan coba lagi."
+    );
+
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+supabaseClient
+    .auth
+    .onAuthStateChange(
+        (
+            event,
+            session
+        ) => {
+
+            if(
+                event ===
+                "SIGNED_OUT"
+            ){
+
+                /*
+                   Jangan redirect jika sedang
+                   berada di halaman login.
+                */
+
+                return;
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>
