@@ -2304,11 +2304,16 @@ async function login(event){
             );
         }
 
-        if(!data?.session || !data?.user){
-            throw new Error(
-                "Login berhasil diproses, tetapi sesi belum tersedia. Silakan coba lagi."
-            );
+        if(!data?.user){
+            throw new Error("Login berhasil diproses, tetapi user belum tersedia. Silakan coba lagi.");
         }
+        let confirmedSession=null;
+        for(let attempt=0;attempt<5;attempt++){
+            const check=await supabaseClient.auth.getSession();
+            if(check?.data?.session){ confirmedSession=check.data.session; break; }
+            await new Promise(r=>setTimeout(r,150));
+        }
+        if(!confirmedSession) throw new Error("Login berhasil tetapi session belum tersimpan. Silakan coba sekali lagi.");
 
         /*
           Jangan menunggu profile/avatar di halaman login.
