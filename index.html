@@ -1193,7 +1193,16 @@ const SUPABASE_KEY =
 const supabaseClient =
     window.supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_KEY
+        SUPABASE_KEY,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage,
+                storageKey: "faqihmart-auth"
+            }
+        }
     );
 
 
@@ -2075,7 +2084,8 @@ async function register(event){
             setTimeout(
                 () => {
 
-                    window.location.replace("dashboard.html");
+                    window.location.href =
+                        "dashboard.html";
 
                 },
                 800
@@ -2272,7 +2282,12 @@ async function login(event){
         return;
     }
 
-    setLoading("loginButton", true, "Memproses...");
+    setLoading(
+        "loginButton",
+        true,
+        "Memproses..."
+    );
+
     isProcessing = true;
 
     try{
@@ -2284,23 +2299,25 @@ async function login(event){
             });
 
         if(error){
-            console.error("Login error:", error);
-            throw new Error(translateSupabaseError(error));
+            console.error("LOGIN ERROR:", error);
+            throw new Error(
+                translateSupabaseError(error)
+            );
         }
 
-        const user = data?.user;
-
-        if(!user){
-            throw new Error("Login gagal.");
+        if(!data?.session || !data?.user){
+            throw new Error(
+                "Login berhasil diproses, tetapi sesi belum tersedia. Silakan coba lagi."
+            );
         }
 
         /*
-          Session sudah berhasil dibuat oleh Supabase.
-          Jangan menunggu query profiles/avatar di halaman login.
-          Dashboard akan memastikan profile tersedia saat init.
+          Jangan menunggu profile/avatar di halaman login.
+          Session sudah tersimpan oleh Supabase. Dashboard akan
+          memuat/memperbaiki data profil setelah session ditemukan.
         */
         showMessage(
-            "Login berhasil. Mengarahkan ke dashboard...",
+            "Login berhasil. Membuka FaqihMart...",
             "success"
         );
 
@@ -2311,7 +2328,8 @@ async function login(event){
         console.error("LOGIN:", error);
 
         showMessage(
-            error.message || "Login gagal."
+            error?.message ||
+            "Login gagal. Silakan coba lagi."
         );
 
     }finally{
