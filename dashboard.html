@@ -3245,7 +3245,7 @@ async function init(){
         if(!data.session){
 
             window.location.href =
-                "login.html";
+                "index.html";
 
             return;
         }
@@ -3299,7 +3299,7 @@ supabaseClient.auth.onAuthStateChange(
         if(event === "SIGNED_OUT"){
 
             window.location.href =
-                "login.html";
+                "index.html";
 
         }
 
@@ -6702,7 +6702,7 @@ async function logout(){
         );
 
         window.location.href =
-            "login.html";
+            "index.html";
 
     }catch(error){
 
