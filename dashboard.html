@@ -2905,6 +2905,20 @@ body.faqih-drawer-open::after{
 </div>
 
 <!-- =========================================================
+     SELLER MENU MODAL - V8
+     Klik akun penjual terlebih dahulu, lalu pilih aksi.
+========================================================= -->
+<div id="sellerMenuModal" class="modal hidden">
+  <div class="modalBox sellerMenuBox">
+    <div class="modalHeader">
+      <h2>Menu Penjual</h2>
+      <button class="closeBtn" type="button" onclick="closeModal('sellerMenuModal')">✕</button>
+    </div>
+    <div id="sellerMenuContent"></div>
+  </div>
+</div>
+
+<!-- =========================================================
      CHAT MODAL - V7
 ========================================================= -->
 <div id="chatModal" class="modal hidden">
@@ -6863,8 +6877,8 @@ setTimeout(
 
 
 /* ============================================================
-   CHAT V7
-   Buyer starts chat from product detail.
+   CHAT V8
+   Buyer taps seller account first, then opens chat from seller menu.
    Seller and buyer share the same inbox UI.
 ============================================================ */
 
