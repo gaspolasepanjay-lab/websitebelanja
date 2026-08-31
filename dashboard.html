@@ -7038,10 +7038,22 @@ async function loadChatConversations(){
     if(chatLoading) return;
     chatLoading=true;
     try{
+        /*
+          V7 soft-delete:
+          buyer hanya melihat chat yang buyer_deleted_at masih NULL,
+          seller hanya melihat chat yang seller_deleted_at masih NULL.
+          Filter di client ini sengaja dipasang juga sebagai lapisan aman
+          supaya chat yang sudah di-hide tidak muncul lagi walaupun ada
+          policy lama yang masih permissive.
+        */
+        const visibleFilter =
+            `and(buyer_id.eq.${currentUser.id},buyer_deleted_at.is.null),` +
+            `and(seller_id.eq.${currentUser.id},seller_deleted_at.is.null)`;
+
         const {data,error}=await supabaseClient
             .from("chat_conversations")
             .select("id,buyer_id,seller_id,product_id,order_id,created_at,last_message_at,buyer_deleted_at,seller_deleted_at")
-            .or(`buyer_id.eq.${currentUser.id},seller_id.eq.${currentUser.id}`)
+            .or(visibleFilter)
             .order("last_message_at",{ascending:false,nullsFirst:false});
         if(error) throw error;
         chatConversations=data||[];
@@ -7285,13 +7297,31 @@ async function deleteChatConversation(event,conversationId){
         : (other?.full_name||other?.username||"penjual ini");
     if(!confirm(`Hapus percakapan dengan ${otherName} dari daftar chat kamu?\n\nPesan lama tidak langsung menghapus akun atau pesanan. Jika ada pesan baru, percakapan bisa muncul lagi.`)) return;
     try{
-        const {error}=await supabaseClient.rpc("hide_nexamart_chat_conversation",{p_conversation_id:conversationId});
+        const {data: hidden,error}=await supabaseClient.rpc(
+            "hide_nexamart_chat_conversation",
+            {p_conversation_id:conversationId}
+        );
         if(error) throw error;
+
+        if(hidden === false){
+            throw new Error("Percakapan tidak ditemukan atau bukan milik akun ini.");
+        }
+
+        /*
+          Hapus langsung dari state lokal supaya UI terasa instan,
+          lalu sinkronkan lagi dari Supabase.
+        */
+        chatConversations=chatConversations.filter(c=>c.id!==conversationId);
+
         if(activeChatConversationId===conversationId){
             activeChatConversationId=null;
             renderChatEmpty();
         }
+
+        renderChatConversationList();
+        updateChatUnreadBadge();
         await loadChatConversations();
+
         showToast("Percakapan berhasil dihapus dari daftar");
     }catch(error){
         console.error("DELETE CHAT CONVERSATION ERROR",error);
