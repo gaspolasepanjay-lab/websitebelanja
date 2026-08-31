@@ -3191,7 +3191,16 @@ const SUPABASE_ANON_KEY =
 const supabaseClient =
     window.supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_ANON_KEY
+        SUPABASE_ANON_KEY,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage,
+                storageKey: "faqihmart-auth"
+            }
+        }
     );
 
 
@@ -3215,21 +3224,32 @@ let cart =
 
 
 /* ============================================================
-   INIT + AUTH
+   INIT + SESSION MANAGEMENT
 ============================================================ */
 
 /*
-  FaqihMart memakai index.html sebagai halaman LOGIN.
-  Dashboard tidak boleh melakukan redirect hanya karena event auth
-  sementara. Dua perangkat dengan dua akun berbeda boleh aktif
-  bersamaan.
+  index.html adalah LOGIN.
+  dashboard.html hanya menerima user yang sudah mempunyai session.
+
+  Penting:
+  - Session disimpan dengan storageKey yang sama dengan index.html.
+  - Supabase auto-refresh token diaktifkan.
+  - Event auth tidak langsung menyebabkan redirect.
+  - SIGNED_OUT diverifikasi ulang di luar callback agar event sementara
+    tidak membuat dashboard melempar user ke halaman login.
 */
 
 let dashboardInitialized = false;
 let dashboardRedirecting = false;
 let explicitLogout = false;
+let sessionWatchTimer = null;
+let recoveringSession = false;
 
-document.addEventListener("DOMContentLoaded", init);
+
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
 
 document.addEventListener("change", event => {
     if(event.target?.id === "checkoutPayment"){
@@ -3238,15 +3258,20 @@ document.addEventListener("change", event => {
 });
 
 
+function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 async function getStableSession(){
 
-    /*
-      Beri waktu Supabase memulihkan session dari storage.
-      Ini mencegah redirect palsu ketika dashboard baru dibuka.
-    */
     let lastError = null;
 
-    for(let attempt = 0; attempt < 3; attempt++){
+    /*
+      Pertama coba session yang sudah ada.
+      Jika belum tersedia, beri browser waktu memulihkan storage.
+    */
+    for(let attempt = 0; attempt < 4; attempt++){
 
         try{
 
@@ -3263,14 +3288,130 @@ async function getStableSession(){
             lastError = error;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 350));
+        await sleep(300);
+    }
+
+    /*
+      Jika tidak ditemukan, coba refresh token.
+      Ini penting ketika access token sedang expired tetapi
+      refresh token masih valid.
+    */
+    try{
+
+        const {data, error} =
+            await supabaseClient.auth.refreshSession();
+
+        if(!error && data?.session){
+            return data.session;
+        }
+
+        if(error){
+            console.warn(
+                "SESSION REFRESH:",
+                error.message
+            );
+        }
+
+    }catch(error){
+
+        lastError = error;
+
     }
 
     if(lastError){
-        console.error("GET SESSION ERROR:", lastError);
+        console.warn(
+            "SESSION CHECK:",
+            lastError.message
+        );
     }
 
     return null;
+}
+
+
+async function recoverSession(){
+
+    if(recoveringSession) return false;
+
+    recoveringSession = true;
+
+    try{
+
+        const session = await getStableSession();
+
+        if(session){
+
+            currentUser = session.user;
+
+            return true;
+
+        }
+
+        return false;
+
+    }finally{
+
+        recoveringSession = false;
+
+    }
+}
+
+
+function startSessionWatchdog(){
+
+    if(sessionWatchTimer){
+        clearInterval(sessionWatchTimer);
+    }
+
+    /*
+      Pemeriksaan berkala hanya memastikan session masih tersedia.
+      Tidak melakukan signOut dan tidak mengganggu dua device.
+    */
+    sessionWatchTimer = setInterval(
+        async () => {
+
+            if(explicitLogout) return;
+
+            try{
+
+                const {data, error} =
+                    await supabaseClient.auth.getSession();
+
+                if(error){
+                    console.warn(
+                        "SESSION WATCH:",
+                        error.message
+                    );
+                    return;
+                }
+
+                if(data?.session){
+
+                    currentUser =
+                        data.session.user;
+
+                    return;
+
+                }
+
+                /*
+                  Session kosong: coba recovery dahulu.
+                  Jangan langsung tampilkan error.
+                */
+                await recoverSession();
+
+            }catch(error){
+
+                console.warn(
+                    "SESSION WATCH:",
+                    error.message
+                );
+
+            }
+
+        },
+        60000
+    );
 }
 
 
@@ -3279,6 +3420,11 @@ async function redirectToLogin(){
     if(dashboardRedirecting) return;
 
     dashboardRedirecting = true;
+
+    if(sessionWatchTimer){
+        clearInterval(sessionWatchTimer);
+        sessionWatchTimer = null;
+    }
 
     window.location.replace("index.html");
 }
@@ -3293,22 +3439,29 @@ async function init(){
         if(!session){
 
             hideLoading();
+
+            /*
+              Dashboard memang tidak boleh digunakan tanpa session.
+              Karena ini bukan kasus normal setelah login, kembali ke
+              index.html secara aman.
+            */
             await redirectToLogin();
+
             return;
         }
 
         currentUser = session.user;
 
         /*
-          Kegagalan data biasa tidak boleh dianggap sebagai logout.
+          Data dashboard boleh gagal satu per satu tanpa membuat
+          session dianggap logout.
         */
         try{
             await loadProfile();
         }catch(error){
             console.error("LOAD PROFILE:", error);
             showToast(
-                "Profil gagal dimuat: " +
-                getErrorMessage(error),
+                "Profil belum dapat dimuat. Fitur lain tetap bisa digunakan.",
                 true
             );
         }
@@ -3342,30 +3495,34 @@ async function init(){
 
         try{
             await loadChatConversations();
-        }catch(chatError){
+        }catch(error){
             console.warn(
-                "Initial chat load:",
-                chatError.message
+                "INITIAL CHAT:",
+                error.message
             );
         }
 
         startChatPolling();
+        startSessionWatchdog();
 
         dashboardInitialized = true;
+
         hideLoading();
 
     }catch(error){
 
-        console.error("DASHBOARD INIT ERROR:", error);
+        console.error(
+            "DASHBOARD INIT ERROR:",
+            error
+        );
 
         hideLoading();
 
         /*
-          Error database/API tidak otomatis mengeluarkan user.
+          Jangan logout hanya karena query database gagal.
         */
         showToast(
-            "Gagal memuat sebagian data: " +
-            getErrorMessage(error),
+            "Dashboard mengalami kendala sementara. Coba muat ulang jika ada data yang belum tampil.",
             true
         );
     }
@@ -3377,32 +3534,99 @@ async function init(){
 ============================================================ */
 
 supabaseClient.auth.onAuthStateChange(
-    async (event, session) => {
+    (event, session) => {
 
         console.log(
             "[FaqihMart Auth]",
             event,
-            session ? "session=OK" : "session=NULL"
+            session ? "SESSION_OK" : "SESSION_NULL"
         );
 
+        if(session?.user){
+
+            currentUser = session.user;
+
+        }
+
         /*
-          Jangan redirect dari event auth biasa.
-          Hanya logout yang benar-benar dilakukan user yang
-          boleh membawa kembali ke index.html.
+          Jangan melakukan await / query Supabase di dalam callback auth.
+          Itu dapat membuat proses auth saling menunggu.
         */
+
         if(event === "SIGNED_OUT"){
 
             if(explicitLogout){
 
-                await redirectToLogin();
-
-            }else{
-
-                showToast(
-                    "Sesi login berakhir. Silakan login kembali jika diperlukan.",
-                    true
+                /*
+                  Logout yang memang diminta user.
+                  Delay kecil memberi waktu event selesai.
+                */
+                setTimeout(
+                    () => redirectToLogin(),
+                    50
                 );
+
+                return;
             }
+
+            /*
+              Jangan langsung menampilkan "Sesi berakhir".
+              Coba pulihkan session di luar callback.
+            */
+            setTimeout(
+                async () => {
+
+                    const recovered =
+                        await recoverSession();
+
+                    if(recovered){
+
+                        console.log(
+                            "[FaqihMart Auth] Session recovered"
+                        );
+
+                        if(!dashboardInitialized){
+                            return;
+                        }
+
+                        try{
+                            await loadProfile();
+                        }catch(e){}
+
+                        return;
+                    }
+
+                    /*
+                      Jika benar-benar tidak ada session, baru arahkan
+                      ke login. Ini mencegah false logout saat token
+                      sedang dipulihkan.
+                    */
+                    if(!explicitLogout){
+                        showToast(
+                            "Sesi login tidak tersedia. Silakan login kembali.",
+                            true
+                        );
+
+                        setTimeout(
+                            async () => {
+
+                                if(!explicitLogout){
+                                    const ok =
+                                        await recoverSession();
+
+                                    if(!ok){
+                                        await redirectToLogin();
+                                    }
+                                }
+
+                            },
+                            2500
+                        );
+                    }
+
+                },
+                300
+            );
         }
     }
 );
@@ -6798,15 +7022,35 @@ async function logout(){
 
         explicitLogout = true;
 
-        await supabaseClient.auth.signOut();
+        if(sessionWatchTimer){
+            clearInterval(sessionWatchTimer);
+            sessionWatchTimer = null;
+        }
 
-        localStorage.removeItem("nexamart_cart");
+        /*
+          signOut akan menghapus session dari storage yang sama.
+        */
+        const {error} =
+            await supabaseClient.auth.signOut();
+
+        if(error){
+            throw error;
+        }
+
+        localStorage.removeItem(
+            "nexamart_cart"
+        );
 
         window.location.replace("index.html");
 
     }catch(error){
 
         explicitLogout = false;
+
+        console.error(
+            "LOGOUT:",
+            error
+        );
 
         showToast(
             "Gagal keluar: " +
@@ -7294,11 +7538,20 @@ async function renderActiveChat(conversation,markRead=true){
         </div>`;
 
     if(markRead){
-        await supabaseClient.from("chat_messages")
-            .update({read_at:new Date().toISOString()})
-            .eq("conversation_id",conversation.id)
-            .eq("receiver_id",currentUser.id)
-            .is("read_at",null);
+        try{
+            await supabaseClient.rpc(
+                "mark_nexamart_chat_read",
+                {
+                    p_conversation_id:
+                        conversation.id
+                }
+            );
+        }catch(error){
+            console.warn(
+                "MARK CHAT READ:",
+                error.message
+            );
+        }
     }
 
     const {data,error}=await supabaseClient
@@ -7335,38 +7588,102 @@ async function renderActiveChat(conversation,markRead=true){
 }
 
 async function sendChatMessage(event){
+
     event.preventDefault();
+
     if(!activeChatConversationId || !currentUser) return;
-    const input=document.getElementById("chatMessageInput");
-    const button=document.getElementById("chatSendBtn");
-    const body=(input?.value||"").trim();
+
+    const input =
+        document.getElementById("chatMessageInput");
+
+    const button =
+        document.getElementById("chatSendBtn");
+
+    const body =
+        (input?.value || "").trim();
+
     if(!body) return;
-    const conversation=chatConversations.find(c=>c.id===activeChatConversationId);
+
+    if(body.length > 5000){
+        showToast(
+            "Pesan maksimal 5000 karakter.",
+            true
+        );
+        return;
+    }
+
+    const conversation =
+        chatConversations.find(
+            c => c.id === activeChatConversationId
+        );
+
     if(!conversation) return;
-    const receiverId=chatOtherUser(conversation);
-    if(!receiverId) return;
 
     try{
-        button.disabled=true;
-        const {error}=await supabaseClient.from("chat_messages").insert({
-            conversation_id:conversation.id,
-            sender_id:currentUser.id,
-            receiver_id:receiverId,
-            body
-        });
+
+        if(button) button.disabled = true;
+
+        /*
+          RPC melakukan validasi peserta + insert secara atomic.
+          Ini mengurangi risiko RLS/trigger error dari client.
+        */
+        const {data, error} =
+            await supabaseClient.rpc(
+                "send_nexamart_chat_message",
+                {
+                    p_conversation_id:
+                        conversation.id,
+                    p_body:
+                        body
+                }
+            );
+
         if(error) throw error;
-        input.value="";
+
+        if(!data){
+            throw new Error(
+                "Pesan tidak berhasil dikirim."
+            );
+        }
+
+        input.value = "";
+
         await loadChatConversations();
-        const fresh=chatConversations.find(c=>c.id===activeChatConversationId);
-        if(fresh) await renderActiveChat(fresh,true);
+
+        const fresh =
+            chatConversations.find(
+                c => c.id === activeChatConversationId
+            );
+
+        if(fresh){
+            await renderActiveChat(
+                fresh,
+                true
+            );
+        }
+
     }catch(error){
-        console.error("SEND CHAT ERROR",error);
-        showToast("Pesan gagal dikirim: "+getErrorMessage(error),true);
+
+        console.error(
+            "SEND CHAT ERROR",
+            error
+        );
+
+        showToast(
+            "Pesan gagal dikirim: " +
+            getErrorMessage(error),
+            true
+        );
+
     }finally{
-        button.disabled=false;
-        input.focus();
+
+        if(button) button.disabled = false;
+
+        if(input) input.focus();
+
     }
 }
+
 
 async function deleteChatMessage(event,messageId){
     if(event) event.stopPropagation();
