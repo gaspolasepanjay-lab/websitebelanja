@@ -1229,8 +1229,7 @@ document.addEventListener(
 
         if(data?.session){
 
-            window.location.href =
-                "dashboard.html";
+            window.location.replace("dashboard.html");
 
             return;
 
@@ -2076,8 +2075,7 @@ async function register(event){
             setTimeout(
                 () => {
 
-                    window.location.href =
-                        "dashboard.html";
+                    window.location.replace("dashboard.html");
 
                 },
                 800
@@ -2257,169 +2255,75 @@ async function login(event){
 
     event.preventDefault();
 
-
-    if(isProcessing)
-        return;
-
+    if(isProcessing) return;
 
     clearMessage();
 
-
     const email =
-        document
-            .getElementById(
-                "loginEmail"
-            )
-            .value
-            .trim()
-            .toLowerCase();
-
+        document.getElementById("loginEmail")
+            .value.trim().toLowerCase();
 
     const password =
-        document
-            .getElementById(
-                "loginPassword"
-            )
+        document.getElementById("loginPassword")
             .value;
 
-
-    if(
-        !email ||
-        !password
-    ){
-
-        showMessage(
-            "Masukkan email dan password."
-        );
-
+    if(!email || !password){
+        showMessage("Masukkan email dan password.");
         return;
-
     }
 
-
-    setLoading(
-        "loginButton",
-        true,
-        "Memproses..."
-    );
-
-
-    isProcessing =
-        true;
-
+    setLoading("loginButton", true, "Memproses...");
+    isProcessing = true;
 
     try{
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .auth
-                .signInWithPassword({
-
-                    email:
-                        email,
-
-                    password:
-                        password
-
-                });
-
+        const {data, error} =
+            await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
 
         if(error){
-
-            console.error(
-                "Login error:",
-                error
-            );
-
-            throw new Error(
-                translateSupabaseError(
-                    error
-                )
-            );
-
+            console.error("Login error:", error);
+            throw new Error(translateSupabaseError(error));
         }
 
-
-        const user =
-            data?.user;
-
+        const user = data?.user;
 
         if(!user){
-
-            throw new Error(
-                "Login gagal."
-            );
-
+            throw new Error("Login gagal.");
         }
 
-
         /*
-           =================================================
-           PROFILE
-           =================================================
+          Session sudah berhasil dibuat oleh Supabase.
+          Jangan menunggu query profiles/avatar di halaman login.
+          Dashboard akan memastikan profile tersedia saat init.
         */
-
-        await createMissingProfileFromAuth(
-            user
-        );
-
-
-        /*
-           =================================================
-           PENDING AVATAR
-           =================================================
-        */
-
-        await uploadPendingAvatar(
-            user
-        );
-
-
         showMessage(
             "Login berhasil. Mengarahkan ke dashboard...",
             "success"
         );
 
+        window.location.replace("dashboard.html");
 
-        setTimeout(
-            () => {
+    }catch(error){
 
-                window.location.href =
-                    "dashboard.html";
-
-            },
-            700
-        );
-
-    }
-    catch(error){
-
-        console.error(
-            error
-        );
+        console.error("LOGIN:", error);
 
         showMessage(
-            error.message ||
-            "Login gagal."
+            error.message || "Login gagal."
         );
 
-    }
-    finally{
+    }finally{
 
-        isProcessing =
-            false;
+        isProcessing = false;
 
         setLoading(
             "loginButton",
             false,
             "Masuk"
         );
-
     }
-
 }
 
 
