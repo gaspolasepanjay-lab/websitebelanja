@@ -3198,7 +3198,6 @@ const supabaseClient =
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
                 storage: window.localStorage,
-                storageKey: "faqihmart-auth"
             }
         }
     );
@@ -3265,153 +3264,70 @@ function sleep(ms){
 
 async function getStableSession(){
 
-    let lastError = null;
-
-    /*
-      Pertama coba session yang sudah ada.
-      Jika belum tersedia, beri browser waktu memulihkan storage.
-    */
-    for(let attempt = 0; attempt < 4; attempt++){
-
-        try{
-
-            const {data, error} =
-                await supabaseClient.auth.getSession();
-
-            if(error){
-                lastError = error;
-            }else if(data?.session){
-                return data.session;
-            }
-
-        }catch(error){
-            lastError = error;
-        }
-
-        await sleep(300);
-    }
-
-    /*
-      Jika tidak ditemukan, coba refresh token.
-      Ini penting ketika access token sedang expired tetapi
-      refresh token masih valid.
-    */
+    // Baca session saja. Supabase menangani auto-refresh token sendiri.
+    // Tidak ada refreshSession() manual untuk mencegah refresh-token race.
     try{
 
         const {data, error} =
-            await supabaseClient.auth.refreshSession();
-
-        if(!error && data?.session){
-            return data.session;
-        }
+            await supabaseClient.auth.getSession();
 
         if(error){
             console.warn(
-                "SESSION REFRESH:",
+                "[FaqihMart Auth] getSession:",
                 error.message
             );
+            return null;
         }
+
+        return data?.session || null;
 
     }catch(error){
 
-        lastError = error;
-
-    }
-
-    if(lastError){
         console.warn(
-            "SESSION CHECK:",
-            lastError.message
+            "[FaqihMart Auth] getSession exception:",
+            error
         );
-    }
 
-    return null;
+        return null;
+    }
 }
 
 
 async function recoverSession(){
 
-    if(recoveringSession) return false;
-
-    recoveringSession = true;
-
     try{
 
         const session = await getStableSession();
 
-        if(session){
+        if(session?.user){
 
             currentUser = session.user;
 
             return true;
-
         }
 
         return false;
 
-    }finally{
+    }catch(error){
 
-        recoveringSession = false;
+        console.warn(
+            "[FaqihMart Auth] recovery:",
+            error.message
+        );
 
+        return false;
     }
 }
 
 
 function startSessionWatchdog(){
 
-    if(sessionWatchTimer){
-        clearInterval(sessionWatchTimer);
-    }
-
     /*
-      Pemeriksaan berkala hanya memastikan session masih tersedia.
-      Tidak melakukan signOut dan tidak mengganggu dua device.
+      Tidak ada auth polling.
+      Supabase JS menangani autoRefreshToken secara internal.
     */
-    sessionWatchTimer = setInterval(
-        async () => {
 
-            if(explicitLogout) return;
-
-            try{
-
-                const {data, error} =
-                    await supabaseClient.auth.getSession();
-
-                if(error){
-                    console.warn(
-                        "SESSION WATCH:",
-                        error.message
-                    );
-                    return;
-                }
-
-                if(data?.session){
-
-                    currentUser =
-                        data.session.user;
-
-                    return;
-
-                }
-
-                /*
-                  Session kosong: coba recovery dahulu.
-                  Jangan langsung tampilkan error.
-                */
-                await recoverSession();
-
-            }catch(error){
-
-                console.warn(
-                    "SESSION WATCH:",
-                    error.message
-                );
-
-            }
-
-        },
-        60000
-    );
+    return;
 }
 
 
@@ -3440,12 +3356,10 @@ async function init(){
 
             hideLoading();
 
-            /*
-              Dashboard memang tidak boleh digunakan tanpa session.
-              Karena ini bukan kasus normal setelah login, kembali ke
-              index.html secara aman.
-            */
-            await redirectToLogin();
+            showToast(
+                "Sesi login belum tersedia. Silakan login dari halaman utama.",
+                true
+            );
 
             return;
         }
@@ -3542,90 +3456,25 @@ supabaseClient.auth.onAuthStateChange(
             session ? "SESSION_OK" : "SESSION_NULL"
         );
 
+        /*
+          Event auth tidak boleh melakukan query auth, refreshSession,
+          signOut, atau redirect.
+
+          Khusus SIGNED_OUT: hanya dicatat. Logout otomatis dimatikan.
+          Logout hanya terjadi ketika fungsi logout() dipanggil user.
+        */
         if(session?.user){
 
             currentUser = session.user;
 
+            return;
         }
-
-        /*
-          Jangan melakukan await / query Supabase di dalam callback auth.
-          Itu dapat membuat proses auth saling menunggu.
-        */
 
         if(event === "SIGNED_OUT"){
 
-            if(explicitLogout){
-
-                /*
-                  Logout yang memang diminta user.
-                  Delay kecil memberi waktu event selesai.
-                */
-                setTimeout(
-                    () => redirectToLogin(),
-                    50
-                );
-
-                return;
-            }
-
-            /*
-              Jangan langsung menampilkan "Sesi berakhir".
-              Coba pulihkan session di luar callback.
-            */
-            setTimeout(
-                async () => {
-
-                    const recovered =
-                        await recoverSession();
-
-                    if(recovered){
-
-                        console.log(
-                            "[FaqihMart Auth] Session recovered"
-                        );
-
-                        if(!dashboardInitialized){
-                            return;
-                        }
-
-                        try{
-                            await loadProfile();
-                        }catch(e){}
-
-                        return;
-                    }
-
-                    /*
-                      Jika benar-benar tidak ada session, baru arahkan
-                      ke login. Ini mencegah false logout saat token
-                      sedang dipulihkan.
-                    */
-                    if(!explicitLogout){
-                        showToast(
-                            "Sesi login tidak tersedia. Silakan login kembali.",
-                            true
-                        );
-
-                        setTimeout(
-                            async () => {
-
-                                if(!explicitLogout){
-                                    const ok =
-                                        await recoverSession();
-
-                                    if(!ok){
-                                        await redirectToLogin();
-                                    }
-                                }
-
-                            },
-                            2500
-                        );
-                    }
-
-                },
-                300
+            console.warn(
+                "[FaqihMart Auth] SIGNED_OUT received; " +
+                "automatic redirect disabled."
             );
         }
     }
@@ -7031,7 +6880,9 @@ async function logout(){
           signOut akan menghapus session dari storage yang sama.
         */
         const {error} =
-            await supabaseClient.auth.signOut();
+            await supabaseClient.auth.signOut({
+                scope: "local"
+            });
 
         if(error){
             throw error;
@@ -7766,12 +7617,33 @@ function updateChatUnreadBadge(forceCount){
 }
 
 function startChatPolling(){
-    if(chatPollTimer) clearInterval(chatPollTimer);
-    chatPollTimer=setInterval(async()=>{
-        if(!currentUser) return;
-        try{ await loadChatConversations(); }
-        catch(error){ console.warn("Chat polling:",error.message); }
-    },5000);
+
+    if(chatPollTimer)
+        clearInterval(chatPollTimer);
+
+    chatPollTimer =
+        setInterval(
+            async () => {
+
+                if(!currentUser?.id)
+                    return;
+
+                try{
+
+                    await loadChatConversations();
+
+                }catch(error){
+
+                    console.warn(
+                        "Chat polling:",
+                        error?.message || error
+                    );
+
+                }
+
+            },
+            5000
+        );
 }
 
 
