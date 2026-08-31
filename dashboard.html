@@ -806,6 +806,88 @@ button{
 .sellerMiniInfo{min-width:0;flex:1}
 .sellerMiniName{font-weight:800}
 .sellerMiniUsername{font-size:12px;color:#6b7280;margin-top:3px}
+.sellerMiniCard{
+    cursor:pointer;
+    transition:.2s ease;
+}
+.sellerMiniCard:hover{
+    border-color:#c9bfff;
+    box-shadow:0 8px 24px rgba(118,87,255,.10);
+    transform:translateY(-1px);
+}
+.sellerMiniCard .sellerChatHint{
+    font-size:12px;
+    color:#7657ff;
+    font-weight:700;
+    margin-top:4px;
+}
+.sellerMenuBox{
+    width:min(430px,100%);
+}
+.sellerMenuProfile{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:8px 0 20px;
+}
+.sellerMenuAvatar{
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#eee;
+    border:3px solid #eeeafe;
+}
+.sellerMenuName{
+    font-size:20px;
+    font-weight:850;
+}
+.sellerMenuUsername{
+    color:#748096;
+    font-size:13px;
+    margin-top:4px;
+}
+.sellerMenuProduct{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fafbfe;
+    margin-bottom:16px;
+}
+.sellerMenuProduct img{
+    width:58px;
+    height:58px;
+    border-radius:11px;
+    object-fit:cover;
+}
+.sellerMenuProductInfo{min-width:0;flex:1}
+.sellerMenuProductName{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sellerMenuProductPrice{color:var(--primary);font-weight:800;margin-top:4px}
+.sellerMenuActions{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+}
+.sellerMenuAction{
+    width:100%;
+    border:0;
+    border-radius:14px;
+    padding:14px 16px;
+    text-align:left;
+    background:#f5f3ff;
+    color:#4b3bb3;
+    font-weight:800;
+}
+.sellerMenuAction:hover{background:#eeeafe}
+.sellerMenuAction.primary{
+    color:#fff;
+    background:linear-gradient(135deg,#7657ff,#6545e8);
+}
+.sellerMenuAction.primary:hover{background:linear-gradient(135deg,#6849f1,#5437dc)}
+
 @media(max-width:760px){
   .chatModalBox{height:90vh}
   .chatLayout{grid-template-columns:1fr}
@@ -3825,13 +3907,15 @@ async function openProductDetail(productId){
           </div>
         </div>
         <div>
-          <div class="sellerMiniCard">
+          <div class="sellerMiniCard" role="button" tabindex="0"
+               onclick="openSellerMenu('${product.id}')"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSellerMenu('${product.id}')}">
             <img class="sellerMiniAvatar" src="${escapeAttr(sellerAvatar)}" alt="Foto penjual">
             <div class="sellerMiniInfo">
               <div class="sellerMiniName">${escapeHtml(sellerName)}</div>
               <div class="sellerMiniUsername">${sellerProfile.username ? "@"+escapeHtml(sellerProfile.username) : "Penjual FaqihMart"}</div>
+              ${product.seller_id !== currentUser?.id ? `<div class="sellerChatHint">Ketuk untuk melihat menu penjual ›</div>` : `<div class="sellerChatHint">Toko saya</div>`}
             </div>
-            ${product.seller_id !== currentUser?.id ? `<button type="button" class="btn" onclick="openChatForProduct('${product.id}')">💬 Chat Penjual</button>` : ""}
           </div>
           <h1 style="margin-top:7px">${escapeHtml(product.name)}</h1>
           <div class="productDetailPrice">${formatRupiah(product.price)}</div>
@@ -6818,12 +6902,24 @@ async function openChatForProduct(productId){
     if(!currentUser){ showToast("Silakan login terlebih dahulu",true); return; }
     const product=(products||[]).find(p=>p.id===productId) || await fetchProductByIdForChat(productId);
     if(!product){ showToast("Produk tidak ditemukan",true); return; }
-    if(product.seller_id===currentUser.id){ showToast("Kamu tidak bisa chat dengan toko sendiri",true); return; }
-    const modal=document.getElementById("chatModal");
-    if(modal) modal.classList.remove("hidden");
+    if(product.seller_id===currentUser.id){
+        showToast("Kamu tidak bisa chat dengan toko sendiri",true);
+        return;
+    }
+
     try{
         const conversation=await getOrCreateChatConversation(product);
+        const modal=document.getElementById("chatModal");
+        if(modal) modal.classList.remove("hidden");
+
         await loadChatConversations();
+
+        /* loadChatConversations dapat memuat ulang object conversation.
+           Jika belum terlihat karena RLS/cache, gunakan ID hasil upsert. */
+        if(!chatConversations.some(c=>c.id===conversation.id)){
+            await loadChatConversations();
+        }
+
         await selectChatConversation(conversation.id);
     }catch(error){
         console.error("OPEN CHAT ERROR",error);
@@ -6842,35 +6938,85 @@ async function fetchProductByIdForChat(productId){
 }
 
 async function getOrCreateChatConversation(product){
-    const {data,error}=await supabaseClient
-        .from("chat_conversations")
-        .select("id,buyer_id,seller_id,product_id,order_id,created_at,last_message_at,buyer_deleted_at,seller_deleted_at")
-        .eq("buyer_id",currentUser.id)
-        .eq("seller_id",product.seller_id)
-        .eq("product_id",product.id)
-        .maybeSingle();
-    if(error) throw error;
-    if(data) return data;
-
-    const insertResult=await supabaseClient
-        .from("chat_conversations")
-        .insert({buyer_id:currentUser.id,seller_id:product.seller_id,product_id:product.id})
-        .select("id,buyer_id,seller_id,product_id,order_id,created_at,last_message_at,buyer_deleted_at,seller_deleted_at")
-        .single();
-    if(insertResult.error){
-        // Jika dua tab membuat percakapan bersamaan, ambil data yang sudah dibuat.
-        const retry=await supabaseClient
-            .from("chat_conversations")
-            .select("id,buyer_id,seller_id,product_id,order_id,created_at,last_message_at,buyer_deleted_at,seller_deleted_at")
-            .eq("buyer_id",currentUser.id)
-            .eq("seller_id",product.seller_id)
-            .eq("product_id",product.id)
-            .maybeSingle();
-        if(retry.error) throw insertResult.error;
-        if(!retry.data) throw insertResult.error;
-        return retry.data;
+    if(!currentUser?.id) throw new Error("Sesi login tidak ditemukan.");
+    if(!product?.id || !product?.seller_id) throw new Error("Data produk/penjual tidak lengkap.");
+    if(product.seller_id === currentUser.id){
+        throw new Error("Kamu tidak bisa membuat chat dengan toko sendiri.");
     }
-    return insertResult.data;
+
+    /*
+      Gunakan RPC SECURITY DEFINER + ON CONFLICT di PostgreSQL.
+      Ini atomic, sehingga klik dua kali / dua tab tidak menghasilkan
+      duplicate key pada chat_conversations.
+    */
+    const {data,error}=await supabaseClient.rpc(
+        "get_or_create_nexamart_chat",
+        {
+            p_seller_id:product.seller_id,
+            p_product_id:product.id
+        }
+    );
+
+    if(error) throw error;
+    if(!data) throw new Error("Percakapan tidak berhasil dibuat/ditemukan.");
+
+    return Array.isArray(data) ? data[0] : data;
+}
+
+async function openSellerMenu(productId){
+    const product=(products||[]).find(p=>p.id===productId) ||
+        (sellerProducts||[]).find(p=>p.id===productId) ||
+        await fetchProductByIdForChat(productId);
+
+    if(!product){
+        showToast("Produk tidak ditemukan",true);
+        return;
+    }
+
+    const store=product.stores||{};
+    const sellerProfile=product.sellerProfile||{};
+    const sellerName=store.name || sellerProfile.full_name || sellerProfile.username || "Penjual";
+    const sellerUsername=sellerProfile.username ? "@"+sellerProfile.username : "Penjual FaqihMart";
+    const avatar=sellerProfile.avatar_url || store.logo_url || makeProductPlaceholder(sellerName);
+    const isOwnStore=product.seller_id===currentUser?.id;
+
+    const box=document.getElementById("sellerMenuContent");
+    const modal=document.getElementById("sellerMenuModal");
+    if(!box || !modal) return;
+
+    box.innerHTML=`
+      <div class="sellerMenuProfile">
+        <img class="sellerMenuAvatar" src="${escapeAttr(avatar)}" alt="Foto penjual">
+        <div>
+          <div class="sellerMenuName">${escapeHtml(sellerName)}</div>
+          <div class="sellerMenuUsername">${escapeHtml(sellerUsername)}</div>
+        </div>
+      </div>
+
+      <div class="sellerMenuProduct">
+        <img src="${escapeAttr(productImage(product))}" alt="">
+        <div class="sellerMenuProductInfo">
+          <div class="sellerMenuProductName">${escapeHtml(product.name||"Produk")}</div>
+          <div class="sellerMenuProductPrice">${formatRupiah(product.price)}</div>
+        </div>
+      </div>
+
+      <div class="sellerMenuActions">
+        ${!isOwnStore ? `
+          <button type="button" class="sellerMenuAction primary"
+                  onclick="closeModal('sellerMenuModal');openChatForProduct('${product.id}')">
+            💬 Chat Penjual
+          </button>` : `
+          <button type="button" class="sellerMenuAction" disabled>
+            🏪 Ini adalah toko kamu
+          </button>`}
+        <button type="button" class="sellerMenuAction"
+                onclick="closeModal('sellerMenuModal');openProductDetail('${product.id}')">
+          🛍️ Lihat Detail Produk
+        </button>
+      </div>
+    `;
+    modal.classList.remove("hidden");
 }
 
 async function loadChatConversations(){
