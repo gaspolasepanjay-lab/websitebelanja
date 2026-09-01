@@ -2200,7 +2200,25 @@ body.faqih-drawer-open::after{
     }
 
     .headerRight .avatarSmall{
-        display:none !important;
+        display:block !important;
+        width:32px !important;
+        height:32px !important;
+        min-width:32px !important;
+        min-height:32px !important;
+        border-radius:50% !important;
+        object-fit:cover !important;
+        object-position:center !important;
+        background:#e5e7eb !important;
+    }
+
+    .headerRight .iconBtn:has(.avatarSmall){
+        display:flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        padding:4px !important;
+        width:42px !important;
+        height:42px !important;
+        flex:0 0 42px !important;
     }
 
     .main{
@@ -2308,6 +2326,8 @@ body.faqih-drawer-open::after{
                 class="avatarSmall"
                 src=""
                 alt="Profil"
+                decoding="async"
+                referrerpolicy="no-referrer"
             >
         </button>
 
@@ -2854,6 +2874,8 @@ body.faqih-drawer-open::after{
                 class="profileAvatar"
                 src=""
                 alt="Avatar"
+                decoding="async"
+                referrerpolicy="no-referrer"
             >
 
             <div>
@@ -3596,9 +3618,12 @@ function renderProfile(){
     const avatar =
         getAvatarUrl();
 
-    document.getElementById(
-        "profileAvatar"
-    ).src = avatar;
+    applyAvatarImage(
+        document.getElementById(
+            "profileAvatar"
+        ),
+        avatar
+    );
 
 }
 
@@ -3623,29 +3648,63 @@ function getAvatarUrl(){
 
 function makeAvatar(text){
 
-    const letter =
-        encodeURIComponent(
-            String(text)
-                .trim()
-                .charAt(0)
-                .toUpperCase() || "N"
+    const label =
+        String(text || "N")
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "N";
+
+    /*
+      Placeholder lokal (data URI), tidak bergantung ui-avatars.com.
+      Jadi tetap muncul di HP walaupun koneksi ke layanan eksternal gagal.
+    */
+    const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+            <rect width="200" height="200" rx="100" fill="#ede9fe"/>
+            <text x="100" y="118" text-anchor="middle"
+                  font-family="Arial,Helvetica,sans-serif"
+                  font-size="82" font-weight="700" fill="#6c5ce7">${escapeHtml(label)}</text>
+        </svg>`;
+
+    return "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(svg);
+}
+
+
+function applyAvatarImage(img, preferredUrl){
+
+    if(!img) return;
+
+    const fallback =
+        makeAvatar(
+            currentProfile?.full_name ||
+            currentProfile?.username ||
+            currentUser?.email ||
+            "N"
         );
 
-    return (
-        "https://ui-avatars.com/api/" +
-        "?name=" +
-        letter +
-        "&size=200"
-    );
+    img.onerror = () => {
+        img.onerror = null;
+        img.src = fallback;
+    };
+
+    img.src =
+        preferredUrl ||
+        fallback;
 }
 
 
 function updateHeaderProfile(){
 
-    document.getElementById(
-        "headerAvatar"
-    ).src =
-        getAvatarUrl();
+    const img =
+        document.getElementById(
+            "headerAvatar"
+        );
+
+    applyAvatarImage(
+        img,
+        getAvatarUrl()
+    );
 }
 
 
